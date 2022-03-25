@@ -1,0 +1,74 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+parameters:
+- name: 'SERVICECONN'
+  displayName: 'Select the service connection related to the env.'
+  type: string
+  default: 'AWS Uat'
+  values:
+    - 'AWS Uat'
+    - 'AWS Prod'
+- name: tags
+  type: object
+  default:
+  - latest
+  - $(tag)
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: Maven@3
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'package'
+        options: '-B -DskipTests=true'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.11'
+        mavenVersionOption: 'Default'
+        mavenOptions: '-Xmx3072m'
+        mavenAuthenticateFeed: false
+        effectivePomSkip: true
+        sonarQubeRunAnalysis: false
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        command: build
+        dockerfile: '$(Build.Repository.LocalPath)/Dockerfile'
+        repository: $(DOCKER_IMAGE)
+        tags: |
+          $(tag)
+          latest
+    - ${{ each tag in parameters.tags }}:
+      - task: ECRPushImage@1
+        displayName: Push tag $(DOCKER_IMAGE) :${{ tag }}
+        inputs:
+          awsCredentials: ${{ parameters.SERVICECONN}}
+          regionName: 'eu-south-1'
+          imageSource: 'imagename'
+          sourceImageName: $(DOCKER_IMAGE)
+          pushTag: ${{ tag }}
+          repositoryName: 'ur-u-ecr'
+    - task: AWSCLI@1
+      inputs:
+        awsCredentials: ${{ parameters.SERVICECONN}}
+        regionName: 'eu-south-1'
+        awsCommand: 'ecs'
+        awsSubCommand: 'update-service'
+        awsArguments: '--cluster ur-u-ecs-cluster --service ur-u-ecs-service --force-new-deployment'
