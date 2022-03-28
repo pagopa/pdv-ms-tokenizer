@@ -64,7 +64,7 @@ stages:
           imageSource: 'imagename'
           sourceImageName: $(DOCKER_IMAGE)
           pushTag: ${{ tag }}
-          repositoryName: 'ur-u-ecr'
+          repositoryName: 'pdv-u-ecr'
     - task: AWSCLI@1
       inputs:
         awsCredentials: ${{ parameters.SERVICECONN}}
