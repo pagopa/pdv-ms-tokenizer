@@ -48,7 +48,7 @@ public class TokenizerController {
 
     @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.summary}",
             notes = "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.notes}")
-    @GetMapping(value = "search")
+    @PostMapping(value = "search")
     public TokenResource searchToken(@ApiParam("${swagger.ms-tokenizer.token.model.namespace}")
                                      @RequestHeader
                                              Namespace namespace,
@@ -64,10 +64,7 @@ public class TokenizerController {
     @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.summary}",
             notes = "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.notes}")
     @GetMapping(value = "{token}/pii")
-    public PiiResource findPii(@ApiParam("${swagger.ms-tokenizer.token.model.namespace}")
-                               @RequestHeader
-                                       Namespace namespace,
-                               @ApiParam("${swagger.tokenizer.token.model.token}")
+    public PiiResource findPii(@ApiParam("${swagger.tokenizer.token.model.token}")
                                @PathVariable UUID token) {
         String pii = tokenizerService.findPiiByToken(token.toString());
         PiiResource piiResource = new PiiResource();

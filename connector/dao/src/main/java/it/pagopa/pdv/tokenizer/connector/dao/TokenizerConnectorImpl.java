@@ -20,7 +20,7 @@ import java.util.Map;
 @Service
 class TokenizerConnectorImpl implements TokenizerConnector {
 
-    public static final String TABLE_NAME = "PiiData";
+    public static final String TABLE_NAME = "Token";
 
     private final DynamoDBMapper dynamoDBMapper;
     private final DynamoDB dynamoDB;
@@ -50,7 +50,7 @@ class TokenizerConnectorImpl implements TokenizerConnector {
             globalToken = globalFiscalCodeToken.getToken();
         } catch (ConditionalCheckFailedException e) {
             Item item = table.getItem(globalFiscalCodeDynamoDBTableMapper.hashKey().name(),
-                    globalFiscalCodeToken.getPK(),
+                    globalFiscalCodeToken.getPii(),
                     globalFiscalCodeDynamoDBTableMapper.rangeKey().name(),
                     Namespace.GLOBAL.toString(),
                     "#field",
@@ -69,7 +69,7 @@ class TokenizerConnectorImpl implements TokenizerConnector {
         } catch (ConditionalCheckFailedException e) {
 
             Item item = table.getItem(namespacedFiscalCodeDynamoDBTableMapper.hashKey().name(),
-                    namespacedFiscalCodeToken.getPK(),
+                    namespacedFiscalCodeToken.getPii(),
                     namespacedFiscalCodeDynamoDBTableMapper.rangeKey().name(),
                     namespacedFiscalCodeToken.getNamespace().toString(),
                     "#field",
@@ -106,14 +106,14 @@ class TokenizerConnectorImpl implements TokenizerConnector {
         if (iterator.hasNext()) {
             Page<Item, QueryOutcome> page = iterator.next();
             if (page.getLowLevelResult().getItems().size() == 0) {
-                throw new RuntimeException("Not Found");
+                throw new RuntimeException("Not Found");//FIXME: change exception
             } else if (page.getLowLevelResult().getItems().size() > 1) {
-                throw new RuntimeException("Too many results");
+                throw new RuntimeException("Too many results");//FIXME: change exception
             } else {
                 pii = page.getLowLevelResult().getItems().get(0).getString("pii");
             }
         } else {
-            throw new RuntimeException("Not Found");
+            throw new RuntimeException("Not Found");//FIXME: change exception
         }
         return pii;
     }

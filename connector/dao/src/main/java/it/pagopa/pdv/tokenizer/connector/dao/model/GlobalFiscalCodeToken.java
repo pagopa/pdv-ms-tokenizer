@@ -7,22 +7,13 @@ import lombok.Data;
 import org.springframework.util.Assert;
 
 @Data
-@DynamoDBTable(tableName = "PiiData")
+@DynamoDBTable(tableName = "Token")
 public class GlobalFiscalCodeToken {
 
-    @DynamoDBAttribute
+    @DynamoDBHashKey(attributeName = "PK")
     private String pii;
 
-    @DynamoDBHashKey(attributeName = "PK")
-    public String getPK() {
-        return "CF#" + pii;
-    }
-
-    public void setPK(String pk) {
-        // intentionally left blank: PK is set by setting pii attribute
-    }
-
-    @DynamoDBRangeKey
+    @DynamoDBRangeKey(attributeName = "SK")
     @DynamoDBTypeConvertedEnum
     private final Namespace namespace = Namespace.GLOBAL;
 

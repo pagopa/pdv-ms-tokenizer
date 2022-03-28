@@ -5,22 +5,13 @@ import it.pagopa.pdv.tokenizer.connector.model.Namespace;
 import lombok.Data;
 
 @Data
-@DynamoDBTable(tableName = "PiiData")
+@DynamoDBTable(tableName = "Token")
 public class NamespacedFiscalCodeToken {
 
-    @DynamoDBAttribute
+    @DynamoDBHashKey(attributeName = "PK")
     private String pii;
 
-    @DynamoDBHashKey(attributeName = "PK")
-    public String getPK() {
-        return "CF#" + pii;
-    }
-
-    public void setPK(String pk) {
-        // intentionally left blank: PK is set by setting pii attribute
-    }
-
-    @DynamoDBRangeKey
+    @DynamoDBRangeKey(attributeName = "SK")
     @DynamoDBTypeConvertedEnum
     private Namespace namespace;
 
