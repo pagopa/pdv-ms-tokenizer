@@ -71,4 +71,4 @@ stages:
         regionName: 'eu-south-1'
         awsCommand: 'ecs'
         awsSubCommand: 'update-service'
-        awsArguments: '--cluster pdv-u-ecs-cluster --service pdv-u-ecs-service --force-new-deployment'
+        awsArguments: '--cluster pdv-u-ecs-cluster --service pdv-u-service-tokenizer --force-new-deployment'
