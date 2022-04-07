@@ -27,13 +27,18 @@
         "description" : "${swagger.ms-tokenizer.tokens.api.save.notes}",
         "operationId" : "saveUsingPUT",
         "parameters" : [ {
-          "name" : "namespace",
-          "in" : "header",
-          "description" : "${swagger.ms-tokenizer.token.model.namespace}",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "GLOBAL", "IO", "PN", "SELFCARE" ]
+          "name": "x-pagopa-namespace",
+          "in": "header",
+          "description": "${swagger.ms-tokenizer.token.model.namespace}",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "GLOBAL",
+              "IO",
+              "PN",
+              "SELFCARE"
+            ]
           }
         } ],
         "requestBody" : {
@@ -81,7 +86,7 @@
         "operationId": "searchTokenUsingPOST",
         "parameters": [
           {
-            "name": "namespace",
+            "name": "x-pagopa-namespace",
             "in": "header",
             "description": "${swagger.ms-tokenizer.token.model.namespace}",
             "required": true,
@@ -94,12 +99,13 @@
                 "SELFCARE"
               ]
             }
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/FilterCriteria"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterCriteria"
               }
             }
           }
@@ -148,15 +154,16 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
           }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PiiResource"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PiiResource"
                 }
               }
             }

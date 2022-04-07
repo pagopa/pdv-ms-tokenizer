@@ -4,9 +4,11 @@ package it.pagopa.pdv.tokenizer.connector.dao.model;
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import it.pagopa.pdv.tokenizer.connector.model.Namespace;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 import org.springframework.util.Assert;
 
 @Data
+@FieldNameConstants(onlyExplicitlyIncluded = true)
 @DynamoDBTable(tableName = "Token")
 public class GlobalFiscalCodeToken {
 
@@ -23,6 +25,7 @@ public class GlobalFiscalCodeToken {
 
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "gsi_token")
     @DynamoDBGeneratedUuid(DynamoDBAutoGenerateStrategy.CREATE)
+    @FieldNameConstants.Include
     private String token;
 
 }

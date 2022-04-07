@@ -37,7 +37,7 @@ public class TokenizerController {
             notes = "${swagger.ms-tokenizer.tokens.api.save.notes}")
     @PutMapping(value = "")
     public TokenResource save(@ApiParam("${swagger.ms-tokenizer.token.model.namespace}")
-                              @RequestHeader
+                                  @RequestHeader("x-pagopa-namespace")
                                       Namespace namespace,
                               @RequestBody
                                       CreateTokenDto request) {
@@ -53,7 +53,7 @@ public class TokenizerController {
             notes = "${swagger.ms-tokenizer.tokens.api.searchToken.notes}")
     @PostMapping(value = "search")
     public TokenResource searchToken(@ApiParam("${swagger.ms-tokenizer.token.model.namespace}")
-                                     @RequestHeader
+                                         @RequestHeader("x-pagopa-namespace")
                                              Namespace namespace,
                                      @RequestBody
                                              FilterCriteria request) {

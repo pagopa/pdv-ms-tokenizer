@@ -58,8 +58,8 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                     globalFiscalCodeDynamoDBTableMapper.rangeKey().name(),
                     Namespace.GLOBAL.toString(),
                     "#0",
-                    Map.of("#0", "token"));
-            tokenDto.setRootToken(item.getString("token"));
+                    Map.of("#0", GlobalFiscalCodeToken.Fields.token));
+            tokenDto.setRootToken(item.getString(GlobalFiscalCodeToken.Fields.token));
         }
 
         NamespacedFiscalCodeToken namespacedFiscalCodeToken = new NamespacedFiscalCodeToken();
@@ -75,8 +75,8 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                     namespacedFiscalCodeTableModel.rangeKey().name(),
                     namespacedFiscalCodeToken.getNamespace().toString(),
                     "#0",
-                    Map.of("#0", "token"));
-            tokenDto.setToken(item.getString("token"));
+                    Map.of("#0", NamespacedFiscalCodeToken.Fields.token));
+            tokenDto.setToken(item.getString(NamespacedFiscalCodeToken.Fields.token));
         }
         return tokenDto;
     }
@@ -92,8 +92,8 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                 namespacedFiscalCodeTableModel.rangeKey().name(),
                 primaryKey.getNamespace().toString(),
                 "#0",
-                Map.of("#0", "token"));
-        return item.getString("token");
+                Map.of("#0", NamespacedFiscalCodeToken.Fields.token));
+        return item.getString(NamespacedFiscalCodeToken.Fields.token);
     }
 
 
@@ -103,8 +103,8 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         String pii;
         Index index = table.getIndex("gsi_token");
         ItemCollection<QueryOutcome> itemCollection = index.query(new QuerySpec()
-                .withHashKey("token", token)
-                .withProjectionExpression("pii"));
+                .withHashKey(NamespacedFiscalCodeToken.Fields.token, token)
+                .withProjectionExpression(namespacedFiscalCodeTableModel.hashKey().name()));
         Iterator<Page<Item, QueryOutcome>> iterator = itemCollection.pages().iterator();
         if (iterator.hasNext()) {
             Page<Item, QueryOutcome> page = iterator.next();
@@ -113,7 +113,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             } else if (page.getLowLevelResult().getItems().size() > 1) {
                 throw new RuntimeException("Too many results");//FIXME: change exception
             } else {
-                pii = page.getLowLevelResult().getItems().get(0).getString("pii");
+                pii = page.getLowLevelResult().getItems().get(0).getString(namespacedFiscalCodeTableModel.hashKey().name());
             }
         } else {
             throw new RuntimeException("Not Found");//FIXME: change exception

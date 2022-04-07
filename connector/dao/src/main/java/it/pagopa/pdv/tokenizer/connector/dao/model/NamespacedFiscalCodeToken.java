@@ -3,8 +3,10 @@ package it.pagopa.pdv.tokenizer.connector.dao.model;
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import it.pagopa.pdv.tokenizer.connector.model.Namespace;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 @Data
+@FieldNameConstants(onlyExplicitlyIncluded = true)
 @DynamoDBTable(tableName = "Token")
 public class NamespacedFiscalCodeToken {
 
@@ -17,6 +19,7 @@ public class NamespacedFiscalCodeToken {
 
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "gsi_token")
     @DynamoDBGeneratedUuid(DynamoDBAutoGenerateStrategy.CREATE)
+    @FieldNameConstants.Include
     private String token;
 
     @DynamoDBAttribute
