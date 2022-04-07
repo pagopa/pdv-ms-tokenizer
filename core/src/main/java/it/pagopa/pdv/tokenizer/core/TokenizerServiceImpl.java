@@ -2,6 +2,7 @@ package it.pagopa.pdv.tokenizer.core;
 
 import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.model.Namespace;
+import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.logging.LogUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,13 @@ class TokenizerServiceImpl implements TokenizerService {
 
 
     @Override
-    public String save(String pii, Namespace namespace) {
+    public TokenDto save(String pii, Namespace namespace) {
         Assert.hasText(pii, "A Private Data is required");
         Assert.notNull(namespace, "A Namespace is required");
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "save input: pii = {}, namespace = {}", pii, namespace);
-        String token = tokenizerConnector.save(pii, namespace);
-        log.debug("save output: token = {}", token);
-        return token;
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
+        log.debug("save output: token = {}", tokenDto);
+        return tokenDto;
     }
 
     @Override

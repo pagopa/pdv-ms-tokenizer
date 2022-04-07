@@ -19,6 +19,11 @@ public class LogRequestInterceptor implements HandlerInterceptor {
     );
 
 
+    public LogRequestInterceptor() {
+        log.trace("Initializing {}", LogRequestInterceptor.class.getSimpleName());
+    }
+
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object controller) {
         boolean skipLog = URI_PREFIX_WHITELIST.stream()

@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.pdv.tokenizer.connector.model.Namespace;
+import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.TokenizerService;
 import it.pagopa.pdv.tokenizer.web.model.CreateTokenDto;
 import it.pagopa.pdv.tokenizer.web.model.FilterCriteria;
@@ -27,6 +28,7 @@ public class TokenizerController {
 
     @Autowired
     public TokenizerController(TokenizerService tokenizerService) {
+        log.trace("Initializing {}", TokenizerController.class.getSimpleName());
         this.tokenizerService = tokenizerService;
     }
 
@@ -39,15 +41,16 @@ public class TokenizerController {
                                       Namespace namespace,
                               @RequestBody
                                       CreateTokenDto request) {
-        String token = tokenizerService.save(request.getPii(), namespace);
+        TokenDto tokenDto = tokenizerService.save(request.getPii(), namespace);
         TokenResource tokenResource = new TokenResource();
-        tokenResource.setToken(UUID.fromString(token));
+        tokenResource.setToken(UUID.fromString(tokenDto.getToken()));
+        tokenResource.setRootToken(UUID.fromString(tokenDto.getRootToken()));
         return tokenResource;
     }
 
 
-    @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.summary}",
-            notes = "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.notes}")
+    @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.searchToken.summary}",
+            notes = "${swagger.ms-tokenizer.tokens.api.searchToken.notes}")
     @PostMapping(value = "search")
     public TokenResource searchToken(@ApiParam("${swagger.ms-tokenizer.token.model.namespace}")
                                      @RequestHeader
@@ -61,8 +64,8 @@ public class TokenizerController {
     }
 
 
-    @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.summary}",
-            notes = "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.notes}")
+    @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.findPii.summary}",
+            notes = "${swagger.ms-tokenizer.tokens.api.findPii.notes}")
     @GetMapping(value = "{token}/pii")
     public PiiResource findPii(@ApiParam("${swagger.tokenizer.token.model.token}")
                                @PathVariable UUID token) {

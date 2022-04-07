@@ -1,0 +1,40 @@
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
+
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSSZZ} [${appName:-}] %-5level [%t] [%X{uid:-uid_IS_UNDEFINED}] [%c{32}] - %msg%n"/>
+
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="async_stdout" class="ch.qos.logback.classic.AsyncAppender">
+        <neverBlock>true</neverBlock>
+        <queueSize>20000</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="stdout"/>
+    </appender>
+
+    <if condition='"true".equalsIgnoreCase(property("ENABLE_CONFIDENTIAL_FILTER"))'>
+        <then>
+            <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
+                <Name>CONFIDENTIAL_FILTER</Name>
+                <Marker>CONFIDENTIAL</Marker>
+                <OnMatch>DENY</OnMatch>
+            </turboFilter>
+        </then>
+    </if>
+
+    <root level="INFO">
+        <appender-ref ref="async_stdout"/>
+    </root>
+
+    <logger name="org.springframework.aop.interceptor.PerformanceMonitorInterceptor" level="TRACE">
+        <appender-ref ref="async_stdout"/>
+    </logger>
+</configuration>

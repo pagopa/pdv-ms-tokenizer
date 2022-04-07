@@ -73,19 +73,27 @@
     },
     "/tokens/search" : {
       "post" : {
-        "tags" : [ "tokens" ],
-        "summary" : "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.summary}",
-        "description" : "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.notes}",
-        "operationId" : "searchTokenUsingPOST",
-        "parameters" : [ {
-          "name" : "namespace",
-          "in" : "header",
-          "description" : "${swagger.ms-tokenizer.token.model.namespace}",
-          "required" : true,
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "GLOBAL", "IO", "PN", "SELFCARE" ]
-          }
+        "tags": [
+          "tokens"
+        ],
+        "summary": "${swagger.ms-tokenizer.tokens.api.searchToken.summary}",
+        "description": "${swagger.ms-tokenizer.tokens.api.searchToken.notes}",
+        "operationId": "searchTokenUsingPOST",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "header",
+            "description": "${swagger.ms-tokenizer.token.model.namespace}",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GLOBAL",
+                "IO",
+                "PN",
+                "SELFCARE"
+              ]
+            }
         } ],
         "requestBody" : {
           "content" : {
@@ -124,19 +132,22 @@
     },
     "/tokens/{token}/pii" : {
       "get" : {
-        "tags" : [ "tokens" ],
-        "summary" : "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.summary}",
-        "description" : "${swagger.ms-tokenizer.tokens.api.getUserByInternalId.notes}",
-        "operationId" : "findPiiUsingGET",
-        "parameters" : [ {
-          "name" : "token",
-          "in" : "path",
-          "description" : "${swagger.tokenizer.token.model.token}",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
+        "tags": [
+          "tokens"
+        ],
+        "summary": "${swagger.ms-tokenizer.tokens.api.findPii.summary}",
+        "description": "${swagger.ms-tokenizer.tokens.api.findPii.notes}",
+        "operationId": "findPiiUsingGET",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "${swagger.tokenizer.token.model.token}",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
           }
         } ],
         "responses" : {
