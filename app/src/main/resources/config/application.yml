@@ -15,6 +15,8 @@ spring:
     include:
       # TO enable specific-language documentations
       - swaggerEN
+  zipkin:
+    enabled: false
 
 info:
   build:
