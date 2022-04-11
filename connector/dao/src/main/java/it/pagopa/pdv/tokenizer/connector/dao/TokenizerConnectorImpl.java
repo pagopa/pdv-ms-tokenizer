@@ -9,7 +9,6 @@ import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.NamespacedFiscalCodeToken;
-import it.pagopa.pdv.tokenizer.connector.model.Namespace;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,8 +26,8 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
     private final DynamoDBMapper dynamoDBMapper;
     private final DynamoDB dynamoDB;
     private final Table table;
-    private final DynamoDBTableMapper<NamespacedFiscalCodeToken, String, Namespace> namespacedFiscalCodeDynamoDBTableMapper;
-    private final DynamoDBTableMapper<GlobalFiscalCodeToken, String, Namespace> globalFiscalCodeDynamoDBTableMapper;
+    private final DynamoDBTableMapper<NamespacedFiscalCodeToken, String, String> namespacedFiscalCodeDynamoDBTableMapper;
+    private final DynamoDBTableMapper<GlobalFiscalCodeToken, String, String> globalFiscalCodeDynamoDBTableMapper;
     private final DynamoDBMapperTableModel<NamespacedFiscalCodeToken> namespacedFiscalCodeTableModel;
 
 
@@ -43,9 +42,9 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
 
 
     @Override
-    public TokenDto save(String pii, Namespace namespace) {//FIXME: get namespace from "logged user info/request info"
+    public TokenDto save(String pii, String namespace) {
         Assert.hasText(pii, "A Private Data is required");
-        Assert.notNull(namespace, "A Namespace is required");
+        Assert.hasText(namespace, "A Namespace is required");
         TokenDto tokenDto = new TokenDto();
         GlobalFiscalCodeToken globalFiscalCodeToken = new GlobalFiscalCodeToken();
         globalFiscalCodeToken.setPii(pii);
@@ -56,7 +55,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             Item item = table.getItem(globalFiscalCodeDynamoDBTableMapper.hashKey().name(),
                     globalFiscalCodeToken.getPii(),
                     globalFiscalCodeDynamoDBTableMapper.rangeKey().name(),
-                    Namespace.GLOBAL.toString(),
+                    GlobalFiscalCodeToken.NAMESPACE,
                     "#0",
                     Map.of("#0", GlobalFiscalCodeToken.Fields.token));
             tokenDto.setRootToken(item.getString(GlobalFiscalCodeToken.Fields.token));
@@ -83,14 +82,14 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
 
 
     @Override
-    public String findById(String pii, Namespace namespace) {
+    public String findById(String pii, String namespace) {
         Assert.hasText(pii, "A Private Data is required");
-        Assert.notNull(namespace, "A Namespace is required");
+        Assert.hasText(namespace, "A Namespace is required");
         NamespacedFiscalCodeToken primaryKey = namespacedFiscalCodeTableModel.createKey(pii, namespace);
         Item item = table.getItem(namespacedFiscalCodeTableModel.hashKey().name(),
                 primaryKey.getPii(),
                 namespacedFiscalCodeTableModel.rangeKey().name(),
-                primaryKey.getNamespace().toString(),
+                primaryKey.getNamespace(),
                 "#0",
                 Map.of("#0", NamespacedFiscalCodeToken.Fields.token));
         return item.getString(NamespacedFiscalCodeToken.Fields.token);

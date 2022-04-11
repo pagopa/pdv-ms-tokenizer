@@ -1,56 +1,52 @@
 {
-  "openapi" : "3.0.3",
-  "info" : {
-    "title" : "Api Documentation",
-    "description" : "Api Documentation",
-    "termsOfService" : "urn:tos",
-    "contact" : { },
-    "license" : {
-      "name" : "Apache 2.0",
-      "url" : "http://www.apache.org/licenses/LICENSE-2.0"
-    },
-    "version" : "1.0"
+  "openapi": "3.0.3",
+  "info": {
+    "title": "pdv-ms-tokenizer",
+    "description": "Tokenizer API documentation",
+    "version": "1.0-SNAPSHOT"
   },
-  "servers" : [ {
-    "url" : "http://localhost:80",
-    "description" : "Inferred Url"
-  } ],
-  "tags" : [ {
-    "name" : "tokens",
-    "description" : "Tokenizer Controller"
-  } ],
-  "paths" : {
-    "/tokens" : {
-      "put" : {
-        "tags" : [ "tokens" ],
-        "summary" : "${swagger.ms-tokenizer.tokens.api.save.summary}",
-        "description" : "${swagger.ms-tokenizer.tokens.api.save.notes}",
-        "operationId" : "saveUsingPUT",
-        "parameters" : [ {
-          "name": "x-pagopa-namespace",
-          "in": "header",
-          "description": "${swagger.ms-tokenizer.token.model.namespace}",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "GLOBAL",
-              "IO",
-              "PN",
-              "SELFCARE"
-            ]
+  "servers": [
+    {
+      "url": "http://localhost:80",
+      "description": "Inferred Url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "token",
+      "description": "Token operations"
+    }
+  ],
+  "paths": {
+    "/tokens": {
+      "put": {
+        "tags": [
+          "token"
+        ],
+        "summary": "Upsert token",
+        "description": "Create a new token given a PII and Namespace, if already exists do nothing",
+        "operationId": "saveUsingPUT",
+        "parameters": [
+          {
+            "name": "x-pagopa-namespace",
+            "in": "header",
+            "description": "Caller visibility context",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/CreateTokenDto"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTokenDto"
               }
             }
           }
         },
-        "responses" : {
+        "responses": {
           "200" : {
             "description" : "OK",
             "content" : {
@@ -79,25 +75,19 @@
     "/tokens/search" : {
       "post" : {
         "tags": [
-          "tokens"
+          "token"
         ],
-        "summary": "${swagger.ms-tokenizer.tokens.api.searchToken.summary}",
-        "description": "${swagger.ms-tokenizer.tokens.api.searchToken.notes}",
-        "operationId": "searchTokenUsingPOST",
+        "summary": "Search token",
+        "description": "Search a token given a PII and Namespace",
+        "operationId": "searchUsingPOST",
         "parameters": [
           {
             "name": "x-pagopa-namespace",
             "in": "header",
-            "description": "${swagger.ms-tokenizer.token.model.namespace}",
+            "description": "Caller visibility context",
             "required": true,
             "schema": {
-              "type": "string",
-              "enum": [
-                "GLOBAL",
-                "IO",
-                "PN",
-                "SELFCARE"
-              ]
+              "type": "string"
             }
           }
         ],
@@ -116,22 +106,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref" : "#/components/schemas/TokenResource"
+                  "$ref": "#/components/schemas/TokenResource"
                 }
               }
             }
           },
-          "201" : {
-            "description" : "Created"
+          "201": {
+            "description": "Created"
           },
-          "401" : {
-            "description" : "Unauthorized"
+          "401": {
+            "description": "Unauthorized"
           },
-          "403" : {
-            "description" : "Forbidden"
+          "403": {
+            "description": "Forbidden"
           },
-          "404" : {
-            "description" : "Not Found"
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -139,16 +129,16 @@
     "/tokens/{token}/pii" : {
       "get" : {
         "tags": [
-          "tokens"
+          "token"
         ],
-        "summary": "${swagger.ms-tokenizer.tokens.api.findPii.summary}",
-        "description": "${swagger.ms-tokenizer.tokens.api.findPii.notes}",
+        "summary": "Find PII",
+        "description": "Find a PII given a token",
         "operationId": "findPiiUsingGET",
         "parameters": [
           {
             "name": "token",
             "in": "path",
-            "description": "${swagger.tokenizer.token.model.token}",
+            "description": "Token related to the PII",
             "required": true,
             "style": "simple",
             "schema": {
@@ -174,8 +164,8 @@
           "403": {
             "description": "Forbidden"
           },
-          "404" : {
-            "description" : "Not Found"
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -190,7 +180,7 @@
         "properties" : {
           "pii" : {
             "type" : "string",
-            "description" : "${swagger.tokenizer.token.model.pii}"
+            "description": "Personal Identifiable Information"
           }
         }
       },
@@ -201,7 +191,7 @@
         "properties" : {
           "pii" : {
             "type" : "string",
-            "description" : "${swagger.tokenizer.token.model.pii}"
+            "description": "Personal Identifiable Information"
           }
         }
       },
@@ -212,7 +202,7 @@
         "properties" : {
           "pii" : {
             "type" : "string",
-            "description" : "${swagger.tokenizer.token.model.pii}"
+            "description": "Personal Identifiable Information"
           }
         }
       },
@@ -222,14 +212,14 @@
         "type" : "object",
         "properties" : {
           "rootToken" : {
-            "type" : "string",
-            "description" : "${swagger.tokenizer.token.model.rootToken}",
-            "format" : "uuid"
+            "type": "string",
+            "description": "Root token related to the PII",
+            "format": "uuid"
           },
           "token" : {
-            "type" : "string",
-            "description" : "${swagger.tokenizer.token.model.token}",
-            "format" : "uuid"
+            "type": "string",
+            "description": "Namespaced token related to the PII",
+            "format": "uuid"
           }
         }
       }

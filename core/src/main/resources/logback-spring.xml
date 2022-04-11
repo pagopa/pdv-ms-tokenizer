@@ -1,18 +1,13 @@
 <!--<?xml version="1.0" encoding="UTF-8"?>-->
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
-        </encoder>
-    </appender>
-
-    <appender name="async_stdout" class="ch.qos.logback.classic.AsyncAppender">
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
         <neverBlock>true</neverBlock>
         <queueSize>20000</queueSize>
         <discardingThreshold>0</discardingThreshold>
-        <appender-ref ref="stdout"/>
+        <appender-ref ref="CONSOLE"/>
     </appender>
 
     <if condition='"true".equalsIgnoreCase(property("ENABLE_CONFIDENTIAL_FILTER"))'>
@@ -26,10 +21,8 @@
     </if>
 
     <root level="INFO">
-        <appender-ref ref="async_stdout"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
     </root>
 
-    <logger name="org.springframework.aop.interceptor.PerformanceMonitorInterceptor" level="TRACE">
-        <appender-ref ref="async_stdout"/>
-    </logger>
+    <logger name="org.springframework.aop.interceptor.PerformanceMonitorInterceptor" level="TRACE"/>
 </configuration>

@@ -3,7 +3,6 @@ package it.pagopa.pdv.tokenizer.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import it.pagopa.pdv.tokenizer.connector.model.Namespace;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.TokenizerService;
 import it.pagopa.pdv.tokenizer.web.model.CreateTokenDto;
@@ -20,7 +19,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping(value = "tokens", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(tags = "tokens")
+@Api(tags = "token")
 public class TokenizerController {
 
     private final TokenizerService tokenizerService;
@@ -33,12 +32,12 @@ public class TokenizerController {
     }
 
 
-    @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.save.summary}",
-            notes = "${swagger.ms-tokenizer.tokens.api.save.notes}")
+    @ApiOperation(value = "${swagger.api.tokens.save.summary}",
+            notes = "${swagger.api.tokens.save.notes}")
     @PutMapping(value = "")
-    public TokenResource save(@ApiParam("${swagger.ms-tokenizer.token.model.namespace}")
-                                  @RequestHeader("x-pagopa-namespace")
-                                      Namespace namespace,
+    public TokenResource save(@ApiParam("${swagger.model.namespace}")
+                              @RequestHeader("x-pagopa-namespace")
+                                      String namespace,
                               @RequestBody
                                       CreateTokenDto request) {
         TokenDto tokenDto = tokenizerService.save(request.getPii(), namespace);
@@ -49,14 +48,14 @@ public class TokenizerController {
     }
 
 
-    @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.searchToken.summary}",
-            notes = "${swagger.ms-tokenizer.tokens.api.searchToken.notes}")
+    @ApiOperation(value = "${swagger.api.tokens.search.summary}",
+            notes = "${swagger.api.tokens.search.notes}")
     @PostMapping(value = "search")
-    public TokenResource searchToken(@ApiParam("${swagger.ms-tokenizer.token.model.namespace}")
-                                         @RequestHeader("x-pagopa-namespace")
-                                             Namespace namespace,
-                                     @RequestBody
-                                             FilterCriteria request) {
+    public TokenResource search(@ApiParam("${swagger.model.namespace}")
+                                @RequestHeader("x-pagopa-namespace")
+                                        String namespace,
+                                @RequestBody
+                                        FilterCriteria request) {
         String token = tokenizerService.findById(request.getPii(), namespace);
         TokenResource tokenResource = new TokenResource();
         tokenResource.setToken(UUID.fromString(token));
@@ -64,10 +63,10 @@ public class TokenizerController {
     }
 
 
-    @ApiOperation(value = "${swagger.ms-tokenizer.tokens.api.findPii.summary}",
-            notes = "${swagger.ms-tokenizer.tokens.api.findPii.notes}")
+    @ApiOperation(value = "${swagger.api.tokens.findPii.summary}",
+            notes = "${swagger.api.tokens.findPii.notes}")
     @GetMapping(value = "{token}/pii")
-    public PiiResource findPii(@ApiParam("${swagger.tokenizer.token.model.token}")
+    public PiiResource findPii(@ApiParam("${swagger.model.token}")
                                @PathVariable UUID token) {
         String pii = tokenizerService.findPiiByToken(token.toString());
         PiiResource piiResource = new PiiResource();
