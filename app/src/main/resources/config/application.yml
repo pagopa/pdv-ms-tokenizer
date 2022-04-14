@@ -1,6 +1,6 @@
 #TODO change name
 server:
-  port: ${MS_TOKENIZER_SERVER_PORT:8080}
+  port: ${APP_SERVER_PORT:8080}
 #  servlet:
 #    context-path: /api
 
@@ -27,4 +27,4 @@ info:
 
 logging:
   level:
-    it.pagopa.pdv.tokenizer: ${MS_TOKENIZER_LOG_LEVEL:DEBUG}
+    it.pagopa.pdv.tokenizer: ${APP_LOG_LEVEL:DEBUG}

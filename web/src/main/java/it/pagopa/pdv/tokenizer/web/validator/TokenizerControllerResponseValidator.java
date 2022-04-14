@@ -29,9 +29,8 @@ public class TokenizerControllerResponseValidator {
 
     @AfterReturning(pointcut = "controllersPointcut()", returning = "result")
     public void validateResponse(JoinPoint joinPoint, Object result) {
-        log.trace("validateResponse");
-        log.debug("result = {}", result);
-
+        log.trace("[validateResponse] start");
+        log.debug("[validateResponse] inputs: result = {}", result);
         if (result != null) {
             if (Collection.class.isAssignableFrom(result.getClass())) {
                 ((Collection<?>) result).forEach(this::validate);
@@ -39,6 +38,7 @@ public class TokenizerControllerResponseValidator {
                 validate(result);
             }
         }
+        log.trace("[validateResponse] end");
     }
 
     private void validate(Object result) {

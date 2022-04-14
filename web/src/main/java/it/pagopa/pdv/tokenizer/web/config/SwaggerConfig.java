@@ -53,7 +53,8 @@ class SwaggerConfig {
                         .build())
                 .select().apis(RequestHandlerSelectors.basePackage("it.pagopa.pdv.tokenizer.web.controller")).build()
                 .tags(new Tag("token", environment.getProperty("swagger.tag.token.description")))
-                .directModelSubstitute(LocalTime.class, String.class);
+                .directModelSubstitute(LocalTime.class, String.class)
+                .forCodeGeneration(true);
     }
 
 }

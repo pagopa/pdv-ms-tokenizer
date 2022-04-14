@@ -5,8 +5,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.TokenizerService;
-import it.pagopa.pdv.tokenizer.web.model.CreateTokenDto;
-import it.pagopa.pdv.tokenizer.web.model.FilterCriteria;
 import it.pagopa.pdv.tokenizer.web.model.PiiResource;
 import it.pagopa.pdv.tokenizer.web.model.TokenResource;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+
+import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;
 
 @Slf4j
 @RestController
@@ -39,11 +39,15 @@ public class TokenizerController {
                               @RequestHeader("x-pagopa-namespace")
                                       String namespace,
                               @RequestBody
-                                      CreateTokenDto request) {
+                                      PiiResource request) {
+        log.trace("[save] start");
+        log.debug(CONFIDENTIAL_MARKER, "[save] inputs: namespace = {}, request = {}", namespace, request);
         TokenDto tokenDto = tokenizerService.save(request.getPii(), namespace);
         TokenResource tokenResource = new TokenResource();
         tokenResource.setToken(UUID.fromString(tokenDto.getToken()));
         tokenResource.setRootToken(UUID.fromString(tokenDto.getRootToken()));
+        log.debug("[save] output = {}", tokenResource);
+        log.trace("[save] end");
         return tokenResource;
     }
 
@@ -55,10 +59,15 @@ public class TokenizerController {
                                 @RequestHeader("x-pagopa-namespace")
                                         String namespace,
                                 @RequestBody
-                                        FilterCriteria request) {
-        String token = tokenizerService.findById(request.getPii(), namespace);
+                                        PiiResource request) {
+        log.trace("[search] start");
+        log.debug(CONFIDENTIAL_MARKER, "[search] inputs: namespace = {}, request = {}", namespace, request);
+        TokenDto tokenDto = tokenizerService.findById(request.getPii(), namespace);
         TokenResource tokenResource = new TokenResource();
-        tokenResource.setToken(UUID.fromString(token));
+        tokenResource.setToken(UUID.fromString(tokenDto.getToken()));
+        tokenResource.setRootToken(UUID.fromString(tokenDto.getRootToken()));
+        log.debug("[search] output = {}", tokenResource);
+        log.trace("[search] end");
         return tokenResource;
     }
 
@@ -68,9 +77,13 @@ public class TokenizerController {
     @GetMapping(value = "{token}/pii")
     public PiiResource findPii(@ApiParam("${swagger.model.token}")
                                @PathVariable UUID token) {
+        log.trace("[findPii] start");
+        log.debug("[findPii] inputs: token = {}", token);
         String pii = tokenizerService.findPiiByToken(token.toString());
         PiiResource piiResource = new PiiResource();
         piiResource.setPii(pii);
+        log.debug(CONFIDENTIAL_MARKER, "[findPii] output = {}", piiResource);
+        log.trace("[findPii] end");
         return piiResource;
     }
 

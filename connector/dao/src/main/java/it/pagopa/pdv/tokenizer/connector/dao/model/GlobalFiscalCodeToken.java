@@ -4,7 +4,6 @@ package it.pagopa.pdv.tokenizer.connector.dao.model;
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
-import org.springframework.util.Assert;
 
 @Data
 @FieldNameConstants(onlyExplicitlyIncluded = true)
@@ -18,11 +17,12 @@ public class GlobalFiscalCodeToken {
     private String pii;
 
     @DynamoDBRangeKey(attributeName = "SK")
-    @DynamoDBTypeConvertedEnum
-    private final String namespace = NAMESPACE;
+    public String getNamespace() {
+        return NAMESPACE;
+    }
 
     public void setNamespace(String namespace) {
-        Assert.isTrue(NAMESPACE.equals(namespace), "Only 'GLOBAL' Namespace is allowed");
+        // intentionally left blank: SK is static data
     }
 
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "gsi_token")

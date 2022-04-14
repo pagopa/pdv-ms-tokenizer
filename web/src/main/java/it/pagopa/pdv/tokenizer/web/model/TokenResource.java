@@ -12,7 +12,8 @@ public class TokenResource {
     @ApiModelProperty(value = "${swagger.model.token.token}", required = true)
     @NotNull
     private UUID token;
-    @ApiModelProperty(value = "${swagger.model.token.rootToken}")
+    @ApiModelProperty(value = "${swagger.model.token.rootToken}", required = true)
+    @NotNull
     private UUID rootToken;
 
 }

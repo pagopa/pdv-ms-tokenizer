@@ -6,7 +6,7 @@ public interface TokenizerService {
 
     TokenDto save(String pii, String namespace);
 
-    String findById(String pii, String namespace);
+    TokenDto findById(String pii, String namespace);
 
     String findPiiByToken(String token);
 

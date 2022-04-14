@@ -41,18 +41,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateTokenDto"
+                "$ref": "#/components/schemas/PiiResource"
               }
             }
           }
         },
         "responses": {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/TokenResource"
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResource"
                 }
               }
             }
@@ -95,7 +95,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterCriteria"
+                "$ref": "#/components/schemas/PiiResource"
               }
             }
           }
@@ -173,28 +173,6 @@
   },
   "components" : {
     "schemas" : {
-      "CreateTokenDto" : {
-        "title" : "CreateTokenDto",
-        "required" : [ "pii" ],
-        "type" : "object",
-        "properties" : {
-          "pii" : {
-            "type" : "string",
-            "description": "Personal Identifiable Information"
-          }
-        }
-      },
-      "FilterCriteria" : {
-        "title" : "FilterCriteria",
-        "required" : [ "pii" ],
-        "type" : "object",
-        "properties" : {
-          "pii" : {
-            "type" : "string",
-            "description": "Personal Identifiable Information"
-          }
-        }
-      },
       "PiiResource" : {
         "title" : "PiiResource",
         "required" : [ "pii" ],
@@ -207,16 +185,19 @@
         }
       },
       "TokenResource" : {
-        "title" : "TokenResource",
-        "required" : [ "token" ],
-        "type" : "object",
-        "properties" : {
-          "rootToken" : {
+        "title": "TokenResource",
+        "required": [
+          "rootToken",
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "rootToken": {
             "type": "string",
             "description": "Root token related to the PII",
             "format": "uuid"
           },
-          "token" : {
+          "token": {
             "type": "string",
             "description": "Namespaced token related to the PII",
             "format": "uuid"

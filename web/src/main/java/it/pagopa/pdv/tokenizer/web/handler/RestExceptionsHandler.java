@@ -1,5 +1,6 @@
 package it.pagopa.pdv.tokenizer.web.handler;
 
+import it.pagopa.pdv.tokenizer.core.exception.ResourceNotFoundException;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class RestExceptionsHandler {
 
-    public static final String UNHANDLED_EXCEPTION = "unhandled exception: ";
+    static final String UNHANDLED_EXCEPTION = "unhandled exception: ";
 
 
     public RestExceptionsHandler() {
@@ -45,7 +46,7 @@ public class RestExceptionsHandler {
     @ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     Problem handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e) {
-        log.warn(e.getMessage());
+        log.warn(e.toString());
         return new Problem(e.getMessage());
     }
 
@@ -53,7 +54,7 @@ public class RestExceptionsHandler {
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     Problem handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.warn(e.getMessage());
+        log.warn(e.toString());
         return new Problem(e.getMessage());
     }
 
@@ -68,7 +69,7 @@ public class RestExceptionsHandler {
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     Problem handleBadRequestException(Exception e) {
-        log.warn(e.getMessage());
+        log.warn(e.toString());
         return new Problem(e.getMessage());
     }
 
@@ -87,11 +88,11 @@ public class RestExceptionsHandler {
     }
 
 
-//    @ExceptionHandler({AccessDeniedException.class})
-//    @ResponseStatus(HttpStatus.FORBIDDEN)
-//    Problem handleAccessDeniedException(AccessDeniedException e) {
-//        log.warn(e.getMessage());
-//        return new Problem(e.getMessage());
-//    }
+    @ExceptionHandler({ResourceNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    Problem handleResourceNotFoundException(ResourceNotFoundException e) {
+        log.warn(e.toString());
+        return new Problem(e.getMessage());
+    }
 
 }
