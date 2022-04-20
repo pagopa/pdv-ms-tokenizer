@@ -77,7 +77,7 @@ stages:
           pushTag: ${{ tag }}
           repositoryName: 'pdv-$(envShort)-ecr'
     - task: AWSCLI@1
-      displayName: Deploy $(envFull) tag $(DOCKER_IMAGE) :${{ tag }} 
+      displayName: Deploy $(envFull) tag $(DOCKER_IMAGE) 
       inputs:
         awsCredentials: ${{ parameters.SERVICECONN}}
         regionName: 'eu-south-1'
