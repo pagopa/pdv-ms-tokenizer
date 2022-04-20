@@ -4,10 +4,13 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTableMapper;
 import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
+import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.NamespacedFiscalCodeToken;
+import it.pagopa.pdv.tokenizer.connector.dao.model.Status;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Marker;
@@ -16,8 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Optional;
+
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.S;
+import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_exists;
 
 @Slf4j
 @Service
@@ -52,13 +57,22 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             globalFiscalCodeTableMapper.saveIfNotExists(globalFiscalCodeToken);//TODO: good for performance??
             tokenDto.setRootToken(globalFiscalCodeToken.getToken());
         } catch (ConditionalCheckFailedException e) {
-            Item item = table.getItem(globalFiscalCodeTableMapper.hashKey().name(),
-                    globalFiscalCodeToken.getPii(),
-                    globalFiscalCodeTableMapper.rangeKey().name(),
-                    GlobalFiscalCodeToken.NAMESPACE,
-                    "#0",
-                    Map.of("#0", GlobalFiscalCodeToken.Fields.token));
-            tokenDto.setRootToken(item.getString(GlobalFiscalCodeToken.Fields.token));
+            GlobalFiscalCodeToken globalTokenFound = globalFiscalCodeTableMapper.load(globalFiscalCodeToken.getPii(), globalFiscalCodeToken.getNamespace());
+            tokenDto.setRootToken(globalTokenFound.getToken());
+            if (Status.PENDING_DELETE.equals(globalTokenFound.getStatus())) {
+                PrimaryKey primaryKey = new PrimaryKey(globalFiscalCodeTableMapper.hashKey().name(),
+                        globalFiscalCodeToken.getPii(),
+                        globalFiscalCodeTableMapper.rangeKey().name(),
+                        globalFiscalCodeToken.getNamespace());
+                table.updateItem(new UpdateItemSpec()
+                        .withPrimaryKey(primaryKey)
+                        .withExpressionSpec(new ExpressionSpecBuilder()
+                                .addUpdate(S(GlobalFiscalCodeToken.Fields.status).set(Status.ACTIVE.toString()))
+                                .withCondition(attribute_exists(globalFiscalCodeTableMapper.hashKey().name())
+                                        .and(attribute_exists(globalFiscalCodeTableMapper.rangeKey().name()))
+                                        .and(S(GlobalFiscalCodeToken.Fields.status).eq(Status.PENDING_DELETE.toString())))
+                                .buildForUpdate()));
+            }
         }
         NamespacedFiscalCodeToken namespacedFiscalCodeToken = new NamespacedFiscalCodeToken();
         namespacedFiscalCodeToken.setPii(pii);
@@ -68,13 +82,23 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             namespacedFiscalCodeTableMapper.saveIfNotExists(namespacedFiscalCodeToken);//TODO: good for performance??
             tokenDto.setToken(namespacedFiscalCodeToken.getToken());
         } catch (ConditionalCheckFailedException e) {
-            Item item = table.getItem(namespacedFiscalCodeTableMapper.hashKey().name(),
-                    namespacedFiscalCodeToken.getPii(),
-                    namespacedFiscalCodeTableMapper.rangeKey().name(),
-                    namespacedFiscalCodeToken.getNamespace(),
-                    "#0",
-                    Map.of("#0", NamespacedFiscalCodeToken.Fields.token));
-            tokenDto.setToken(item.getString(NamespacedFiscalCodeToken.Fields.token));
+            NamespacedFiscalCodeToken namespacedTokenFound =
+                    namespacedFiscalCodeTableMapper.load(namespacedFiscalCodeToken.getPii(), namespacedFiscalCodeToken.getNamespace());
+            tokenDto.setToken(namespacedTokenFound.getToken());
+            if (Status.PENDING_DELETE.equals(namespacedTokenFound.getStatus())) {
+                PrimaryKey primaryKey = new PrimaryKey(namespacedFiscalCodeTableMapper.hashKey().name(),
+                        namespacedFiscalCodeToken.getPii(),
+                        namespacedFiscalCodeTableMapper.rangeKey().name(),
+                        namespacedFiscalCodeToken.getNamespace());
+                table.updateItem(new UpdateItemSpec()
+                        .withPrimaryKey(primaryKey)
+                        .withExpressionSpec(new ExpressionSpecBuilder()
+                                .addUpdate(S(NamespacedFiscalCodeToken.Fields.status).set(Status.ACTIVE.toString()))
+                                .withCondition(attribute_exists(namespacedFiscalCodeTableMapper.hashKey().name())
+                                        .and(attribute_exists(namespacedFiscalCodeTableMapper.rangeKey().name()))
+                                        .and(S(NamespacedFiscalCodeToken.Fields.status).eq(Status.PENDING_DELETE.toString())))
+                                .buildForUpdate()));
+            }
         }
         log.debug("[save] output = {}", tokenDto);
         log.trace("[save] end");
@@ -89,20 +113,14 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         Assert.hasText(pii, "A Private Data is required");
         Assert.hasText(namespace, "A Namespace is required");
         Optional<TokenDto> result = Optional.empty();
-        Item item = table.getItem(namespacedFiscalCodeTableMapper.hashKey().name(),
-                pii,
-                namespacedFiscalCodeTableMapper.rangeKey().name(),
-                namespace,
-                "#0,#1",
-                Map.of("#0", NamespacedFiscalCodeToken.Fields.token,
-                        "#1", NamespacedFiscalCodeToken.Fields.globalToken)
-        );
-        if (item != null) {
-            TokenDto tokenDto = new TokenDto();
-            tokenDto.setToken(item.getString(NamespacedFiscalCodeToken.Fields.token));
-            tokenDto.setRootToken(item.getString(NamespacedFiscalCodeToken.Fields.globalToken));
-            result = Optional.of(tokenDto);
-        }
+        result = Optional.ofNullable(namespacedFiscalCodeTableMapper.load(pii, namespace))
+                .filter(p -> Status.ACTIVE.equals(p.getStatus()))
+                .map(namespacedFiscalCodeToken -> {
+                    TokenDto tokenDto = new TokenDto();
+                    tokenDto.setToken(namespacedFiscalCodeToken.getToken());
+                    tokenDto.setRootToken(namespacedFiscalCodeToken.getGlobalToken());
+                    return tokenDto;
+                });
         log.debug("[findById] output = {}", result);
         log.trace("[findById] end");
         return result;
@@ -118,7 +136,11 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         Index index = table.getIndex("gsi_token");
         ItemCollection<QueryOutcome> itemCollection = index.query(new QuerySpec()
                 .withHashKey(NamespacedFiscalCodeToken.Fields.token, token)
-                .withProjectionExpression(namespacedFiscalCodeTableMapper.hashKey().name()));
+                .withExpressionSpec(new ExpressionSpecBuilder()
+                        .withCondition(S(NamespacedFiscalCodeToken.Fields.status).ne(Status.PENDING_DELETE.toString()))
+                        .addProjection(namespacedFiscalCodeTableMapper.hashKey().name())
+                        .buildForQuery())
+        );
         Iterator<Page<Item, QueryOutcome>> iterator = itemCollection.pages().iterator();
         if (iterator.hasNext()) {
             Page<Item, QueryOutcome> page = iterator.next();

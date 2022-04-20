@@ -57,11 +57,11 @@
               }
             }
           },
-          "201" : {
-            "description" : "Created"
+          "201": {
+            "description": "Created"
           },
-          "401" : {
-            "description" : "Unauthorized"
+          "401": {
+            "description": "Unauthorized"
           },
           "403" : {
             "description" : "Forbidden"
