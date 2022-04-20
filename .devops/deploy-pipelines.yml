@@ -8,9 +8,6 @@ trigger:
 resources:
 - repo: self
 
-variables:
-  tag: '$(Build.BuildId)'
-
 parameters:
 - name: 'SERVICECONN'
   displayName: 'Select the service connection related to the env.'
@@ -24,6 +21,15 @@ parameters:
   default:
   - latest
   - $(tag)
+
+variables:
+  - name: tag 
+    value: '$(Build.BuildId)'
+  - name: envShort
+    ${{ if eq( parameters['SERVICECONN'], 'AWS Uat') }}:
+      value: u
+    ${{ if eq( parameters['SERVICECONN'], 'AWS Prod') }}:
+      value: p
 
 stages:
 - stage: Build
@@ -64,11 +70,11 @@ stages:
           imageSource: 'imagename'
           sourceImageName: $(DOCKER_IMAGE)
           pushTag: ${{ tag }}
-          repositoryName: 'pdv-u-ecr'
+          repositoryName: 'pdv-$(envShort)-ecr'
     - task: AWSCLI@1
       inputs:
         awsCredentials: ${{ parameters.SERVICECONN}}
         regionName: 'eu-south-1'
         awsCommand: 'ecs'
         awsSubCommand: 'update-service'
-        awsArguments: '--cluster pdv-u-ecs-cluster --service pdv-u-service-tokenizer --force-new-deployment'
+        awsArguments: '--cluster pdv-$(envShort)-ecs-cluster --service pdv-$(envShort)-service-tokenizer --force-new-deployment'
