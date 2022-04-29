@@ -34,9 +34,7 @@ public class PerformanceLoggingConfig {
 
     @Bean
     public Advisor performanceMonitorAdvisor() {
-        if (log.isTraceEnabled()) {
-            log.trace(String.format("Creating Bean PerformanceLoggingConfig.performanceMonitorAdvisor of type %s", Advisor.class.getName()));
-        }
+        log.debug("Creating Bean PerformanceLoggingConfig.performanceMonitorAdvisor of type {}", Advisor.class.getName());
         AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
         pointcut.setExpression(String.format("%s.springBeanPointcut()", PerformanceLoggingConfig.class.getName()));
         return new DefaultPointcutAdvisor(pointcut, performanceMonitorInterceptor());
@@ -44,9 +42,7 @@ public class PerformanceLoggingConfig {
 
     @Bean
     public PerformanceMonitorInterceptor performanceMonitorInterceptor() {
-        if (log.isTraceEnabled()) {
-            log.trace(String.format("Creating Bean PerformanceLoggingConfig.performanceMonitorInterceptor of type %s", PerformanceMonitorInterceptor.class.getName()));
-        }
+        log.debug("Creating Bean PerformanceLoggingConfig.performanceMonitorInterceptor of type {}", PerformanceMonitorInterceptor.class.getName());
         return new PerformanceMonitorInterceptor(false);
     }
 

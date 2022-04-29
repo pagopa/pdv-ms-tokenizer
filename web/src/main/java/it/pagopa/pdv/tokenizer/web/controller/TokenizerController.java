@@ -22,6 +22,8 @@ import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;
 @Api(tags = "token")
 public class TokenizerController {
 
+    private static final String NAMESPACE_HEADER_NAME = "x-pagopa-namespace";
+
     private final TokenizerService tokenizerService;
 
 
@@ -36,7 +38,7 @@ public class TokenizerController {
             notes = "${swagger.api.tokens.save.notes}")
     @PutMapping(value = "")
     public TokenResource save(@ApiParam("${swagger.model.namespace}")
-                              @RequestHeader("x-pagopa-namespace")
+                              @RequestHeader(NAMESPACE_HEADER_NAME)
                                       String namespace,
                               @RequestBody
                                       PiiResource request) {
@@ -56,7 +58,7 @@ public class TokenizerController {
             notes = "${swagger.api.tokens.search.notes}")
     @PostMapping(value = "search")
     public TokenResource search(@ApiParam("${swagger.model.namespace}")
-                                @RequestHeader("x-pagopa-namespace")
+                                    @RequestHeader(NAMESPACE_HEADER_NAME)
                                         String namespace,
                                 @RequestBody
                                         PiiResource request) {

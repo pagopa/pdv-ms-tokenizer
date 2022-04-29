@@ -3,13 +3,6 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
-        <neverBlock>true</neverBlock>
-        <queueSize>20000</queueSize>
-        <discardingThreshold>0</discardingThreshold>
-        <appender-ref ref="CONSOLE"/>
-    </appender>
-
     <if condition='"true".equalsIgnoreCase(property("ENABLE_CONFIDENTIAL_FILTER"))'>
         <then>
             <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
@@ -21,7 +14,7 @@
     </if>
 
     <root level="INFO">
-        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="CONSOLE"/>
     </root>
 
     <logger name="org.springframework.aop.interceptor.PerformanceMonitorInterceptor" level="TRACE"/>

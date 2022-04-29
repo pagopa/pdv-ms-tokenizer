@@ -17,6 +17,9 @@ spring:
       - swaggerEN
   zipkin:
     enabled: false
+  sleuth:
+    propagation:
+      type: AWS
 
 info:
   build:
