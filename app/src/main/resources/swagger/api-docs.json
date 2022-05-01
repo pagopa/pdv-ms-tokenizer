@@ -174,12 +174,37 @@
   "components" : {
     "schemas" : {
       "PiiResource" : {
-        "title" : "PiiResource",
-        "type": "object"
+        "title": "PiiResource",
+        "required": [
+          "pii"
+        ],
+        "type": "object",
+        "properties": {
+          "pii": {
+            "type": "string",
+            "description": "Personal Identifiable Information"
+          }
+        }
       },
       "TokenResource" : {
         "title": "TokenResource",
-        "type": "object"
+        "required": [
+          "rootToken",
+          "token"
+        ],
+        "type": "object",
+        "properties": {
+          "rootToken": {
+            "type": "string",
+            "description": "Root token related to the PII",
+            "format": "uuid"
+          },
+          "token": {
+            "type": "string",
+            "description": "Namespaced token related to the PII",
+            "format": "uuid"
+          }
+        }
       }
     }
   }
