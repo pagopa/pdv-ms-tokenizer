@@ -75,7 +75,7 @@ stages:
           imageSource: 'imagename'
           sourceImageName: $(DOCKER_IMAGE)
           pushTag: ${{ tag }}
-          repositoryName: 'pdv-$(envShort)-ecr'
+          repositoryName: 'tokenizer-$(envShort)-ecr'
     - task: AWSCLI@1
       displayName: Deploy $(envFull) tag $(DOCKER_IMAGE) 
       inputs:
@@ -83,4 +83,4 @@ stages:
         regionName: 'eu-south-1'
         awsCommand: 'ecs'
         awsSubCommand: 'update-service'
-        awsArguments: '--cluster pdv-$(envShort)-ecs-cluster --service pdv-$(envShort)-service-tokenizer --force-new-deployment'
+        awsArguments: '--cluster tokenizer-$(envShort)-ecs-cluster --service tokenizer-$(envShort)-service-tokenizer --force-new-deployment'
