@@ -51,58 +51,76 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         Assert.hasText(pii, "A Private Data is required");
         Assert.hasText(namespace, "A Namespace is required");
         TokenDto tokenDto = new TokenDto();
+        tokenDto.setRootToken(saveGlobalToken(pii));
+        tokenDto.setToken(saveNamespacedToken(pii, namespace, tokenDto.getRootToken()));
+        log.debug("[save] output = {}", tokenDto);
+        log.trace("[save] end");
+        return tokenDto;
+    }
+
+
+    private String saveGlobalToken(String pii) {
+        String rootToken;
         GlobalFiscalCodeToken globalFiscalCodeToken = new GlobalFiscalCodeToken();
         globalFiscalCodeToken.setPii(pii);
         try {
             globalFiscalCodeTableMapper.saveIfNotExists(globalFiscalCodeToken);//TODO: good for performance??
-            tokenDto.setRootToken(globalFiscalCodeToken.getToken());
+            rootToken = globalFiscalCodeToken.getToken();
         } catch (ConditionalCheckFailedException e) {
             GlobalFiscalCodeToken globalTokenFound = globalFiscalCodeTableMapper.load(globalFiscalCodeToken.getPii(), globalFiscalCodeToken.getNamespace());
-            tokenDto.setRootToken(globalTokenFound.getToken());
+            rootToken = globalTokenFound.getToken();
             if (Status.PENDING_DELETE.equals(globalTokenFound.getStatus())) {
-                PrimaryKey primaryKey = new PrimaryKey(globalFiscalCodeTableMapper.hashKey().name(),
+                reactivateToken(globalFiscalCodeTableMapper.hashKey().name(),
                         globalFiscalCodeToken.getPii(),
                         globalFiscalCodeTableMapper.rangeKey().name(),
-                        globalFiscalCodeToken.getNamespace());
-                table.updateItem(new UpdateItemSpec()
-                        .withPrimaryKey(primaryKey)
-                        .withExpressionSpec(new ExpressionSpecBuilder()
-                                .addUpdate(S(GlobalFiscalCodeToken.Fields.status).set(Status.ACTIVE.toString()))
-                                .withCondition(attribute_exists(globalFiscalCodeTableMapper.hashKey().name())
-                                        .and(attribute_exists(globalFiscalCodeTableMapper.rangeKey().name()))
-                                        .and(S(GlobalFiscalCodeToken.Fields.status).eq(Status.PENDING_DELETE.toString())))
-                                .buildForUpdate()));
+                        globalFiscalCodeToken.getNamespace(),
+                        GlobalFiscalCodeToken.Fields.status);
             }
         }
+        return rootToken;
+    }
+
+
+    private String saveNamespacedToken(String pii, String namespace, String rootToken) {
+        String token;
         NamespacedFiscalCodeToken namespacedFiscalCodeToken = new NamespacedFiscalCodeToken();
         namespacedFiscalCodeToken.setPii(pii);
         namespacedFiscalCodeToken.setNamespace(namespace);
-        namespacedFiscalCodeToken.setGlobalToken(tokenDto.getRootToken());
+        namespacedFiscalCodeToken.setGlobalToken(rootToken);
         try {
             namespacedFiscalCodeTableMapper.saveIfNotExists(namespacedFiscalCodeToken);//TODO: good for performance??
-            tokenDto.setToken(namespacedFiscalCodeToken.getToken());
+            token = namespacedFiscalCodeToken.getToken();
         } catch (ConditionalCheckFailedException e) {
             NamespacedFiscalCodeToken namespacedTokenFound =
                     namespacedFiscalCodeTableMapper.load(namespacedFiscalCodeToken.getPii(), namespacedFiscalCodeToken.getNamespace());
-            tokenDto.setToken(namespacedTokenFound.getToken());
+            token = namespacedTokenFound.getToken();
             if (Status.PENDING_DELETE.equals(namespacedTokenFound.getStatus())) {
-                PrimaryKey primaryKey = new PrimaryKey(namespacedFiscalCodeTableMapper.hashKey().name(),
+                reactivateToken(namespacedFiscalCodeTableMapper.hashKey().name(),
                         namespacedFiscalCodeToken.getPii(),
                         namespacedFiscalCodeTableMapper.rangeKey().name(),
-                        namespacedFiscalCodeToken.getNamespace());
-                table.updateItem(new UpdateItemSpec()
-                        .withPrimaryKey(primaryKey)
-                        .withExpressionSpec(new ExpressionSpecBuilder()
-                                .addUpdate(S(NamespacedFiscalCodeToken.Fields.status).set(Status.ACTIVE.toString()))
-                                .withCondition(attribute_exists(namespacedFiscalCodeTableMapper.hashKey().name())
-                                        .and(attribute_exists(namespacedFiscalCodeTableMapper.rangeKey().name()))
-                                        .and(S(NamespacedFiscalCodeToken.Fields.status).eq(Status.PENDING_DELETE.toString())))
-                                .buildForUpdate()));
+                        namespacedFiscalCodeToken.getNamespace(),
+                        NamespacedFiscalCodeToken.Fields.status);
             }
         }
-        log.debug("[save] output = {}", tokenDto);
-        log.trace("[save] end");
-        return tokenDto;
+        return token;
+    }
+
+
+    private void reactivateToken(String hashKeyName, Object hashKeyValue,
+                                 String rangeKeyName, Object rangeKeyValue,
+                                 String statusFieldName) {
+        PrimaryKey primaryKey = new PrimaryKey(hashKeyName,
+                hashKeyValue,
+                rangeKeyName,
+                rangeKeyValue);
+        table.updateItem(new UpdateItemSpec()
+                .withPrimaryKey(primaryKey)
+                .withExpressionSpec(new ExpressionSpecBuilder()
+                        .addUpdate(S(statusFieldName).set(Status.ACTIVE.toString()))
+                        .withCondition(attribute_exists(hashKeyName)
+                                .and(attribute_exists(rangeKeyName))
+                                .and(S(statusFieldName).eq(Status.PENDING_DELETE.toString())))
+                        .buildForUpdate()));
     }
 
 
