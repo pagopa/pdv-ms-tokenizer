@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-class DaoConfig {
+class DynamoDBConfig {
 
     @Configuration
     @Profile("!dev-local")
@@ -48,7 +48,7 @@ class DaoConfig {
 
     @Configuration
     @Profile("dev-local")
-    @PropertySource("classpath:config/dao-config.properties")
+    @PropertySource("classpath:config/dynamodb-config.properties")
     static class DevLocal {
 
         @Value("${amazon.region}")
