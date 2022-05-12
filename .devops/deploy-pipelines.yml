@@ -1,0 +1,86 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- main
+
+resources:
+- repo: self
+
+parameters:
+- name: 'SERVICECONN'
+  displayName: 'Select the service connection related to the env.'
+  type: string
+  default: 'AWS Uat'
+  values:
+    - 'AWS Uat'
+    - 'AWS Prod'
+- name: tags
+  type: object
+  default:
+  - latest
+  - $(tag)
+
+variables:
+  - name: tag 
+    value: '$(Build.BuildId)'
+  - name: envShort
+    ${{ if eq( parameters['SERVICECONN'], 'AWS Uat') }}:
+      value: u
+    ${{ if eq( parameters['SERVICECONN'], 'AWS Prod') }}:
+      value: p
+  - name: envFull
+    ${{ if eq( parameters['SERVICECONN'], 'AWS Uat') }}:
+      value: Uat
+    ${{ if eq( parameters['SERVICECONN'], 'AWS Prod') }}:
+      value: Prod
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: Maven@3
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'package'
+        options: '-B -DskipTests=true'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.11'
+        mavenVersionOption: 'Default'
+        mavenOptions: '-Xmx3072m'
+        mavenAuthenticateFeed: false
+        effectivePomSkip: true
+        sonarQubeRunAnalysis: false
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        command: build
+        dockerfile: '$(Build.Repository.LocalPath)/Dockerfile'
+        repository: $(DOCKER_IMAGE)
+        tags: |
+          $(tag)
+          latest
+    - ${{ each tag in parameters.tags }}:
+      - task: ECRPushImage@1
+        displayName: Push $(envFull) tag $(DOCKER_IMAGE) :${{ tag }} 
+        inputs:
+          awsCredentials: ${{ parameters.SERVICECONN}}
+          regionName: 'eu-south-1'
+          imageSource: 'imagename'
+          sourceImageName: $(DOCKER_IMAGE)
+          pushTag: ${{ tag }}
+          repositoryName: 'tokenizer-$(envShort)-ecr'
+    - task: AWSCLI@1
+      displayName: Deploy $(envFull) tag $(DOCKER_IMAGE) 
+      inputs:
+        awsCredentials: ${{ parameters.SERVICECONN}}
+        regionName: 'eu-south-1'
+        awsCommand: 'ecs'
+        awsSubCommand: 'update-service'
+        awsArguments: '--cluster tokenizer-$(envShort)-ecs-cluster --service tokenizer-$(envShort)-service-tokenizer --force-new-deployment'

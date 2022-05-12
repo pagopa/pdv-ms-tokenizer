@@ -1,0 +1,21 @@
+<!--<?xml version="1.0" encoding="UTF-8"?>-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <if condition='"true".equalsIgnoreCase(property("ENABLE_CONFIDENTIAL_FILTER"))'>
+        <then>
+            <turboFilter class="ch.qos.logback.classic.turbo.MarkerFilter">
+                <Name>CONFIDENTIAL_FILTER</Name>
+                <Marker>CONFIDENTIAL</Marker>
+                <OnMatch>DENY</OnMatch>
+            </turboFilter>
+        </then>
+    </if>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <logger name="org.springframework.aop.interceptor.PerformanceMonitorInterceptor" level="TRACE"/>
+</configuration>
