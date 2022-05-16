@@ -1,5 +1,6 @@
 package it.pagopa.pdv.tokenizer.web.validator;
 
+import it.pagopa.pdv.tokenizer.web.exception.ResponseValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -43,14 +44,14 @@ public class TokenizerControllerResponseValidator {
 
     private void validate(Object result) {
         Set<ConstraintViolation<Object>> validationResults = validator.validate(result);
-        if (validationResults.size() > 0) {
+        if (!validationResults.isEmpty()) {
             Map<String, List<String>> errorMessage = new HashMap<>();
-            validationResults.forEach((error) -> {
+            validationResults.forEach(error -> {
                 String fieldName = error.getPropertyPath().toString();
                 errorMessage.computeIfAbsent(fieldName, s -> new ArrayList<>())
                         .add(error.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName() + " constraint violation");
             });
-            throw new RuntimeException(errorMessage.toString());
+            throw new ResponseValidationException(errorMessage.toString());
         }
     }
 
