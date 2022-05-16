@@ -8,34 +8,6 @@ trigger:
 resources:
 - repo: self
 
-parameters:
-- name: 'SERVICECONN'
-  displayName: 'Select the service connection related to the env.'
-  type: string
-  default: 'AWS Uat'
-  values:
-    - 'AWS Uat'
-    - 'AWS Prod'
-- name: tags
-  type: object
-  default:
-  - latest
-  - $(tag)
-
-variables:
-  - name: tag 
-    value: '$(Build.BuildId)'
-  - name: envShort
-    ${{ if eq( parameters['SERVICECONN'], 'AWS Uat') }}:
-      value: u
-    ${{ if eq( parameters['SERVICECONN'], 'AWS Prod') }}:
-      value: p
-  - name: envFull
-    ${{ if eq( parameters['SERVICECONN'], 'AWS Uat') }}:
-      value: Uat
-    ${{ if eq( parameters['SERVICECONN'], 'AWS Prod') }}:
-      value: Prod
-
 stages:
 - stage: Build
   displayName: Build image
@@ -45,6 +17,15 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
+    - task: SonarCloudPrepare@1
+      displayName: 'Prepare SonarCloud analysis configuration'
+      inputs:
+        SonarCloud: '$(SONARCLOUD_SERVICE_CONN)'
+        organization: '$(SONARCLOUD_ORG)'
+        scannerMode: Other
+        extraProperties: |
+          sonar.projectKey=$(SONARCLOUD_PROJECT_KEY)
+          sonar.projectName=$(SONARCLOUD_PROJECT_NAME)
     - task: Maven@3
       inputs:
         mavenPomFile: 'pom.xml'
@@ -59,3 +40,7 @@ stages:
         publishJUnitResults: true
         testResultsFiles: '**/surefire-reports/TEST-*.xml'
         sonarQubeRunAnalysis: true
+    - task: SonarCloudPublish@1
+      displayName: 'Publish SonarCloud results on build summary'
+      inputs:
+        pollingTimeoutSec: '300'
