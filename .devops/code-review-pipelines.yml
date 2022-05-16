@@ -3,7 +3,8 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- main
+  - main
+  - release-*
 
 resources:
 - repo: self
@@ -39,7 +40,7 @@ stages:
         effectivePomSkip: true
         publishJUnitResults: true
         testResultsFiles: '**/surefire-reports/TEST-*.xml'
-        sonarQubeRunAnalysis: true
+        sonarQubeRunAnalysis: false
     - task: SonarCloudPublish@1
       displayName: 'Publish SonarCloud results on build summary'
       inputs:
