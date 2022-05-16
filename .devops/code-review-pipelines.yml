@@ -14,6 +14,8 @@ variables:
     value: 'key'
   - name: AWS_SECRET_KEY
     value: 'secret-key'
+  - name: AWS_REGION
+    value: 'local'
 
 steps:
   - task: SonarCloudPrepare@1
