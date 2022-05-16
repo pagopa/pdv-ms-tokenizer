@@ -32,7 +32,7 @@ steps:
     inputs:
       mavenPomFile: 'pom.xml'
       goals: 'clean org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate '
-      options: '-B -Dmaven.test.failure.ignore=true -Dspring.profiles.active=dev-local'
+      options: '-B -Dmaven.test.failure.ignore=true'
       publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       javaHomeOption: 'JDKVersion'
@@ -46,7 +46,7 @@ steps:
     inputs:
       mavenPomFile: 'pom.xml'
       goals: 'sonar:sonar'
-      options: '-B -Dsonar.coverage.jacoco.xmlReportPaths=$(xmlReportPaths) -Dspring.profiles.active=dev-local'
+      options: '-B -Dsonar.coverage.jacoco.xmlReportPaths=$(xmlReportPaths)'
       publishJUnitResults: false
       javaHomeOption: 'JDKVersion'
       mavenVersionOption: 'Default'
