@@ -38,8 +38,8 @@ steps:
   - task: Maven@3
     inputs:
       mavenPomFile: 'pom.xml'
-      goals: 'sonar:sonar'
-      options: '-B -Dsonar.coverage.jacoco.xmlReportPaths=$(xmlReportPaths) -DskipTests=true'
+      goals: 'sonar:sonar package'
+      options: '-B -Dsonar.coverage.jacoco.xmlReportPaths=$(xmlReportPaths)'
       publishJUnitResults: false
       javaHomeOption: 'JDKVersion'
       mavenVersionOption: 'Default'
