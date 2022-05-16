@@ -78,7 +78,7 @@ public class RestExceptionsHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     Problem handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         Map<String, List<String>> errorMessage = new HashMap<>();
-        e.getAllErrors().forEach((error) -> {
+        e.getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             errorMessage.computeIfAbsent(fieldName, s -> new ArrayList<>())
                     .add(error.getCode() + " constraint violation");

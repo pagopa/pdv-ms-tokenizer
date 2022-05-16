@@ -85,7 +85,6 @@ class DynamoDBConfig {
             try {
                 ListTablesResult tablesResult = client.listTables();
                 if (!tablesResult.getTableNames().contains(TokenizerConnectorImpl.TABLE_NAME)) {
-                    // Single table design: any of the domain class will contain the data needed to create the table
                     CreateTableRequest tableRequest = dynamoDBMapper.generateCreateTableRequest(NamespacedFiscalCodeToken.class);
                     tableRequest.setProvisionedThroughput(new ProvisionedThroughput(5L, 5L));
 

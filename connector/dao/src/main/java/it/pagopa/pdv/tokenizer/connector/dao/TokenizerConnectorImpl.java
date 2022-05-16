@@ -130,8 +130,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         log.debug(CONFIDENTIAL_MARKER, "[findById] inputs: pii = {}, namespace = {}", pii, namespace);
         Assert.hasText(pii, "A Private Data is required");
         Assert.hasText(namespace, "A Namespace is required");
-        Optional<TokenDto> result = Optional.empty();
-        result = Optional.ofNullable(namespacedFiscalCodeTableMapper.load(pii, namespace))
+        Optional<TokenDto> result = Optional.ofNullable(namespacedFiscalCodeTableMapper.load(pii, namespace))
                 .filter(p -> Status.ACTIVE.equals(p.getStatus()))
                 .map(namespacedFiscalCodeToken -> {
                     TokenDto tokenDto = new TokenDto();
