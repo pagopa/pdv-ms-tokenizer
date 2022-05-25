@@ -82,23 +82,19 @@ class DynamoDBConfig {
 
 
         private void dynamoDBLocalSetup(AmazonDynamoDB client, DynamoDBMapper dynamoDBMapper) {
-            try {
-                ListTablesResult tablesResult = client.listTables();
-                if (!tablesResult.getTableNames().contains(TokenizerConnectorImpl.TABLE_NAME)) {
-                    CreateTableRequest tableRequest = dynamoDBMapper.generateCreateTableRequest(NamespacedFiscalCodeToken.class);
-                    tableRequest.setProvisionedThroughput(new ProvisionedThroughput(5L, 5L));
+            ListTablesResult tablesResult = client.listTables();
+            if (!tablesResult.getTableNames().contains(TokenizerConnectorImpl.TABLE_NAME)) {
+                CreateTableRequest tableRequest = dynamoDBMapper.generateCreateTableRequest(NamespacedFiscalCodeToken.class);
+                tableRequest.setProvisionedThroughput(new ProvisionedThroughput(5L, 5L));
 
-                    if (tableRequest.getGlobalSecondaryIndexes() != null) {
-                        tableRequest.getGlobalSecondaryIndexes().forEach(gsi -> {
-                            gsi.setProvisionedThroughput(new ProvisionedThroughput(5L, 5L));
-                            gsi.getProjection().setProjectionType(ProjectionType.ALL);
-                        });
-                    }
-
-                    client.createTable(tableRequest);
+                if (tableRequest.getGlobalSecondaryIndexes() != null) {
+                    tableRequest.getGlobalSecondaryIndexes().forEach(gsi -> {
+                        gsi.setProvisionedThroughput(new ProvisionedThroughput(5L, 5L));
+                        gsi.getProjection().setProjectionType(ProjectionType.ALL);
+                    });
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+
+                client.createTable(tableRequest);
             }
         }
     }
