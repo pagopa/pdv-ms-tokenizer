@@ -1,8 +1,6 @@
 package it.pagopa.pdv.tokenizer.web.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.TokenizerService;
 import it.pagopa.pdv.tokenizer.web.model.PiiResource;
@@ -20,6 +18,7 @@ import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;
 @RestController
 @RequestMapping(value = "tokens", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(tags = "token")
+@ApiResponses({@ApiResponse(code = 400, message = "Bad Request")})
 public class TokenizerController {
 
     private static final String NAMESPACE_HEADER_NAME = "x-pagopa-namespace";
@@ -56,6 +55,7 @@ public class TokenizerController {
 
     @ApiOperation(value = "${swagger.api.tokens.search.summary}",
             notes = "${swagger.api.tokens.search.notes}")
+    @ApiResponses({@ApiResponse(code = 404, message = "Not Found")})
     @PostMapping(value = "search")
     public TokenResource search(@ApiParam("${swagger.model.namespace}")
                                     @RequestHeader(NAMESPACE_HEADER_NAME)
