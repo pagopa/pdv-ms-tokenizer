@@ -30,7 +30,7 @@ steps:
     inputs:
       mavenPomFile: 'pom.xml'
       goals: 'clean org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate '
-      options: '-B -Dmaven.test.failure.ignore=true'
+      options: '-B'
       publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       javaHomeOption: 'JDKVersion'
