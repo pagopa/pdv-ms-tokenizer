@@ -1,13 +1,14 @@
 package it.pagopa.pdv.tokenizer.web.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.pdv.tokenizer.web.controller.TokenizerController;
+import it.pagopa.pdv.tokenizer.connector.dao.LocalDBCreationExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -22,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@ActiveProfiles("dev-local")
+@ExtendWith(LocalDBCreationExtension.class)
 class SwaggerConfigTest {
 
     @Autowired
@@ -29,9 +32,6 @@ class SwaggerConfigTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @MockBean
-    private TokenizerController tokenizerController;
 
     private MockMvc mockMvc;
 
