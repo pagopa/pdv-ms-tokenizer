@@ -1,15 +1,22 @@
 package it.pagopa.pdv.tokenizer.web.controller;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.TokenizerService;
 import it.pagopa.pdv.tokenizer.web.model.PiiResource;
+import it.pagopa.pdv.tokenizer.web.model.Problem;
 import it.pagopa.pdv.tokenizer.web.model.TokenResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;
@@ -18,7 +25,6 @@ import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;
 @RestController
 @RequestMapping(value = "tokens", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(tags = "token")
-@ApiResponses({@ApiResponse(code = 400, message = "Bad Request")})
 public class TokenizerController {
 
     private static final String NAMESPACE_HEADER_NAME = "x-pagopa-namespace";
@@ -40,6 +46,7 @@ public class TokenizerController {
                               @RequestHeader(NAMESPACE_HEADER_NAME)
                                       String namespace,
                               @RequestBody
+                              @Valid
                                       PiiResource request) {
         log.trace("[save] start");
         log.debug(CONFIDENTIAL_MARKER, "[save] inputs: namespace = {}, request = {}", namespace, request);
@@ -55,12 +62,18 @@ public class TokenizerController {
 
     @ApiOperation(value = "${swagger.api.tokens.search.summary}",
             notes = "${swagger.api.tokens.search.notes}")
-    @ApiResponses({@ApiResponse(code = 404, message = "Not Found")})
+    @ApiResponse(responseCode = "404",
+            description = "Not Found",
+            content = {
+                    @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = Problem.class))
+            })
     @PostMapping(value = "search")
     public TokenResource search(@ApiParam("${swagger.model.namespace}")
-                                    @RequestHeader(NAMESPACE_HEADER_NAME)
+                                @RequestHeader(NAMESPACE_HEADER_NAME)
                                         String namespace,
                                 @RequestBody
+                                @Valid
                                         PiiResource request) {
         log.trace("[search] start");
         log.debug(CONFIDENTIAL_MARKER, "[search] inputs: namespace = {}, request = {}", namespace, request);

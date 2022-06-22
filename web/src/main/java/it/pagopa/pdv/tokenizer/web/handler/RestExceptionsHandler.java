@@ -2,26 +2,24 @@ package it.pagopa.pdv.tokenizer.web.handler;
 
 import it.pagopa.pdv.tokenizer.core.exception.ResourceNotFoundException;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
+import it.pagopa.pdv.tokenizer.web.model.mapper.ProblemMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import javax.servlet.ServletException;
 import javax.validation.ValidationException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
 @RestControllerAdvice
@@ -36,26 +34,23 @@ public class RestExceptionsHandler {
 
 
     @ExceptionHandler({Exception.class})
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    Problem handleThrowable(Throwable e) {
+    ResponseEntity<Problem> handleThrowable(Throwable e) {
         log.error(UNHANDLED_EXCEPTION, e);
-        return new Problem(e.getMessage());
+        return ProblemMapper.toResponseEntity(new Problem(INTERNAL_SERVER_ERROR, e.getMessage()));
     }
 
 
     @ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    Problem handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e) {
+    ResponseEntity<Problem> handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e) {
         log.warn(e.toString());
-        return new Problem(e.getMessage());
+        return ProblemMapper.toResponseEntity(new Problem(NOT_ACCEPTABLE, e.getMessage()));
     }
 
 
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    Problem handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
+    ResponseEntity<Problem> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
         log.warn(e.toString());
-        return new Problem(e.getMessage());
+        return ProblemMapper.toResponseEntity(new Problem(METHOD_NOT_ALLOWED, e.getMessage()));
     }
 
 
@@ -67,32 +62,27 @@ public class RestExceptionsHandler {
             MaxUploadSizeExceededException.class,
             HttpMessageNotReadableException.class
     })
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    Problem handleBadRequestException(Exception e) {
+    ResponseEntity<Problem> handleBadRequestException(Exception e) {
         log.warn(e.toString());
-        return new Problem(e.getMessage());
+        return ProblemMapper.toResponseEntity(new Problem(BAD_REQUEST, e.getMessage()));
     }
 
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    Problem handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        Map<String, List<String>> errorMessage = new HashMap<>();
-        e.getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            errorMessage.computeIfAbsent(fieldName, s -> new ArrayList<>())
-                    .add(error.getCode() + " constraint violation");
-        });
-        log.warn(errorMessage.toString());
-        return new Problem(errorMessage.toString());
+    ResponseEntity<Problem> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        final Problem problem = new Problem(BAD_REQUEST, "Validation failed");
+        problem.setInvalidParams(e.getFieldErrors().stream()
+                .map(fieldError -> new Problem.InvalidParam(fieldError.getObjectName() + "." + fieldError.getField(), fieldError.getDefaultMessage()))
+                .collect(Collectors.toList()));
+        log.warn(e.toString());
+        return ProblemMapper.toResponseEntity(problem);
     }
 
 
     @ExceptionHandler({ResourceNotFoundException.class})
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    Problem handleResourceNotFoundException(ResourceNotFoundException e) {
+    ResponseEntity<Problem> handleResourceNotFoundException(ResourceNotFoundException e) {
         log.warn(e.toString());
-        return new Problem(e.getMessage());
+        return ProblemMapper.toResponseEntity(new Problem(NOT_FOUND, e.getMessage()));
     }
 
 }

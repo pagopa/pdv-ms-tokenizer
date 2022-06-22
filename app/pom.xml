@@ -20,6 +20,17 @@
             <artifactId>pdv-ms-tokenizer-connector-dao</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>it.pagopa.pdv</groupId>
+            <artifactId>pdv-ms-tokenizer-connector-dao</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>DynamoDBLocal</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
