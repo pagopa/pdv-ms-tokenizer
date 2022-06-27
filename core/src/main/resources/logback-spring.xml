@@ -32,7 +32,7 @@
             <if condition='"true".equalsIgnoreCase(property("ENABLE_SINGLE_LINE_STACK_TRACE_LOGGING"))'>
                 <then>
                     <property name="msg_and_ex_log_pattern"
-                              value="%m%replace(%ex){'${line.separator}',' ~~ '}%nopex%n"/>
+                              value="%m%replace(%ex){'${line.separator}','${LINE_SEPARATOR_REPLACEMENT: ~~ }'}%nopex%n"/>
                 </then>
                 <else>
                     <property name="msg_and_ex_log_pattern" value="%m%n%wEx"/>
