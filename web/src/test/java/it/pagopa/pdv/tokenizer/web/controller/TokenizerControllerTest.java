@@ -100,11 +100,13 @@ class TokenizerControllerTest {
         // given
         UUID token = UUID.randomUUID();
         String pii = "pii";
-        Mockito.when(tokenizerServiceMock.findPiiByToken(Mockito.anyString(), namespace))
+        String namespace = "namespace";
+        Mockito.when(tokenizerServiceMock.findPiiByToken(Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(pii);
         // when
         mvc.perform(MockMvcRequestBuilders
                 .get(BASE_URL + "/{token}/pii", token)
+                        .header(NAMESPACE_HEADER_NAME, namespace)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.status().isOk())

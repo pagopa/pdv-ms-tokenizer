@@ -138,6 +138,7 @@ class TokenizerServiceImplTest {
     void findPiiByToken_nullToken() {
         // given
         String token = null;
+        String namespace = "namespace";
         // when
         Executable executable = () -> tokenizerService.findPiiByToken(token, namespace);
         // then
@@ -151,7 +152,8 @@ class TokenizerServiceImplTest {
     void findPiiByToken_notFound() {
         // given
         String token = "token";
-        Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any(), namespace))
+        String namespace = "namespace";
+        Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.empty());
         // when
         Executable executable = () -> tokenizerService.findPiiByToken(token, namespace);
@@ -168,7 +170,9 @@ class TokenizerServiceImplTest {
         // given
         String token = "token";
         String piiStub = "pii";
-        Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any(), namespace))
+        String namespace = "namespace";
+
+        Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.of(piiStub));
         // when
         String pii = tokenizerService.findPiiByToken(token, namespace);

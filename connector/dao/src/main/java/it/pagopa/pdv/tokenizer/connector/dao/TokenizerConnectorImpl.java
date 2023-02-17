@@ -155,8 +155,8 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         ItemCollection<QueryOutcome> itemCollection = index.query(new QuerySpec()
                 .withHashKey(NamespacedFiscalCodeToken.Fields.token, token)
                 .withExpressionSpec(new ExpressionSpecBuilder()
-                        .withCondition(S(NamespacedFiscalCodeToken.Fields.status).ne(Status.PENDING_DELETE.toString()))
-                        .withCondition(S(NamespacedFiscalCodeToken.Fields.namespace).eq(namespace))
+                        .withCondition(S(NamespacedFiscalCodeToken.Fields.status).ne(Status.PENDING_DELETE.toString())
+                                .and(S("SK").eq(namespace)))
                         .addProjection(namespacedFiscalCodeTableMapper.hashKey().name())
                         .buildForQuery())
         );

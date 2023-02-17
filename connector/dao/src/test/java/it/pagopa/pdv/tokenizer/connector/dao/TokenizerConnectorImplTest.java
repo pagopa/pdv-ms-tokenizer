@@ -142,7 +142,7 @@ class TokenizerConnectorImplTest {
     void findPiiByToken_usingGlobalToken() {
         // given
         String pii = "pii";
-        String namespace = "selfcare";
+        String namespace = "GLOBAL";
         TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
         Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), namespace);
