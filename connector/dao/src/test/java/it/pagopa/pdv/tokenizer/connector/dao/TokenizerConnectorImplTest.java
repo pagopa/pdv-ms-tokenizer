@@ -129,8 +129,9 @@ class TokenizerConnectorImplTest {
     void findPiiByToken_nullToken() {
         // given
         String token = null;
+        String namespace = "namespace";
         // when
-        Executable executable = () -> tokenizerConnector.findPiiByToken(token);
+        Executable executable = () -> tokenizerConnector.findPiiByToken(token, namespace);
         // then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A token is required", e.getMessage());
@@ -144,7 +145,7 @@ class TokenizerConnectorImplTest {
         String namespace = "selfcare";
         TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken());
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), namespace);
         // then
         assertTrue(found.isPresent());
         assertEquals(pii, found.get());
@@ -158,7 +159,7 @@ class TokenizerConnectorImplTest {
         String namespace = "selfcare";
         TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken());
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), namespace);
         // then
         assertTrue(found.isPresent());
         assertEquals(pii, found.get());

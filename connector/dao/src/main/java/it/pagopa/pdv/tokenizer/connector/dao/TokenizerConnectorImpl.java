@@ -145,16 +145,18 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
 
 
     @Override
-    public Optional<String> findPiiByToken(String token) {
+    public Optional<String> findPiiByToken(String token, String namespace) {
         log.trace("[findPiiByToken] start");
-        log.debug("[findPiiByToken] inputs: token = {}", token);
+        log.debug("[findPiiByToken] inputs: token = {}, namespace = {}", token, namespace);
         Assert.hasText(token, "A token is required");
+        Assert.hasText(namespace, "A namespace is required");
         Optional<String> pii = Optional.empty();
         Index index = table.getIndex("gsi_token");
         ItemCollection<QueryOutcome> itemCollection = index.query(new QuerySpec()
                 .withHashKey(NamespacedFiscalCodeToken.Fields.token, token)
                 .withExpressionSpec(new ExpressionSpecBuilder()
                         .withCondition(S(NamespacedFiscalCodeToken.Fields.status).ne(Status.PENDING_DELETE.toString()))
+                        .withCondition(S(NamespacedFiscalCodeToken.Fields.namespace).eq(namespace))
                         .addProjection(namespacedFiscalCodeTableMapper.hashKey().name())
                         .buildForQuery())
         );

@@ -10,6 +10,6 @@ public interface TokenizerConnector {
 
     Optional<TokenDto> findById(String pii, String namespace);
 
-    Optional<String> findPiiByToken(String token);
+    Optional<String> findPiiByToken(String token, String namespace);
 
 }

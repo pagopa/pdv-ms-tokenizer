@@ -15,6 +15,7 @@ public class NamespacedFiscalCodeToken {
     private String pii;
 
     @DynamoDBRangeKey(attributeName = "SK")
+    @FieldNameConstants.Include
     private String namespace;
 
     @DynamoDBIndexHashKey(globalSecondaryIndexName = "gsi_token")

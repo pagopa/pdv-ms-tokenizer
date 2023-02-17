@@ -100,7 +100,7 @@ class TokenizerControllerTest {
         // given
         UUID token = UUID.randomUUID();
         String pii = "pii";
-        Mockito.when(tokenizerServiceMock.findPiiByToken(Mockito.anyString()))
+        Mockito.when(tokenizerServiceMock.findPiiByToken(Mockito.anyString(), namespace))
                 .thenReturn(pii);
         // when
         mvc.perform(MockMvcRequestBuilders
@@ -111,7 +111,7 @@ class TokenizerControllerTest {
                 .andExpect(jsonPath("$.pii", notNullValue()));
         // then
         Mockito.verify(tokenizerServiceMock, Mockito.times(1))
-                .findPiiByToken(token.toString());
+                .findPiiByToken(token.toString(), namespace);
         Mockito.verifyNoMoreInteractions(tokenizerServiceMock);
     }
 
