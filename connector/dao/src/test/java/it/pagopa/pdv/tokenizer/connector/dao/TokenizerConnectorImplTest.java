@@ -3,6 +3,7 @@ package it.pagopa.pdv.tokenizer.connector.dao;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import it.pagopa.pdv.tokenizer.connector.dao.config.DaoTestConfig;
+import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -142,10 +143,10 @@ class TokenizerConnectorImplTest {
     void findPiiByToken_usingGlobalToken() {
         // given
         String pii = "pii";
-        String namespace = "GLOBAL";
+        String namespace = "selfcare";
         TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), namespace);
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), GlobalFiscalCodeToken.NAMESPACE);
         // then
         assertTrue(found.isPresent());
         assertEquals(pii, found.get());
@@ -163,6 +164,19 @@ class TokenizerConnectorImplTest {
         // then
         assertTrue(found.isPresent());
         assertEquals(pii, found.get());
+    }
+
+    @Test
+    void findPiiByToken_usingNotAllowedNamespacedToken() {
+        // given
+        String pii = "pii";
+        String namespace = "selfcare";
+        String notAllowedNamespace = "idpay";
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
+        // when
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace);
+        // then
+        assertFalse(found.isPresent());
     }
 
 }

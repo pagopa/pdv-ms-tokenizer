@@ -156,7 +156,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                 .withHashKey(NamespacedFiscalCodeToken.Fields.token, token)
                 .withExpressionSpec(new ExpressionSpecBuilder()
                         .withCondition(S(NamespacedFiscalCodeToken.Fields.status).ne(Status.PENDING_DELETE.toString())
-                                .and(S("SK").eq(namespace)))
+                                .and(S(namespacedFiscalCodeTableMapper.rangeKey().name()).eq(namespace)))
                         .addProjection(namespacedFiscalCodeTableMapper.hashKey().name())
                         .buildForQuery())
         );
