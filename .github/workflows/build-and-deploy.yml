@@ -127,7 +127,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@61b0c00c3743b70987a73a1faf577f0d167d1574
         with:
           task-definition: ./task-definition.json
-          container-name: pdv-${{ matrix.env_short }}-container
+          container-name: tokenizer-${{ matrix.env_short }}-container
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
@@ -135,6 +135,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: pdv-${{ matrix.env_short }}-service-tokenizer
-          cluster: pdv-${{ matrix.env_short }}-ecs-cluster
+          service: tokenizer-${{ matrix.env_short }}-service-tokenizer
+          cluster: tokenizer-${{ matrix.env_short }}-ecs-cluster
           wait-for-service-stability: true
