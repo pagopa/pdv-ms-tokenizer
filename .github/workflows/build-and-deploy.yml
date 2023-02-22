@@ -109,7 +109,7 @@ jobs:
         if: needs.build.outputs.new_release_published == 'true'
         run: |
           aws ecs describe-task-definition \
-          --task-definition pdv-${{ matrix.env_short }}-task-tokenizer \
+          --task-definition tokenizer-${{ matrix.env_short }}-task-tokenizer \
           --query taskDefinition > ./task-definition.json
           echo $(cat ./task-definition.json | jq 'del(
                   .taskDefinitionArn,
