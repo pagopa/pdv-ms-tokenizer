@@ -3,15 +3,13 @@ name: Java CI
 on:
   push:
     branches:
-      - "**"
+      - "*"
       - "!main"
-      - "!release-*"
   pull_request:
     types:
       - closed
     branches:
-      - "main"
-      - "release-*"
+      - 'main'
 
 jobs:
   build:
@@ -19,7 +17,6 @@ jobs:
     outputs:
       new_release_published: ${{ steps.release.outputs.new_release_published }}
       new_release_version: ${{ steps.release.outputs.new_release_version }}
-      matrix: ${{ steps.setmatrix.outputs.matrix }}
 
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
@@ -56,35 +53,27 @@ jobs:
             @semantic-release/git@10.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set Dynamic Env Matrix
-        id: setmatrix
-        run: |
-          if [ ${{ steps.release.outputs.new_release_published == 'true' }} == true ]; then 
-            matrixStringifiedObject="{\"include\":[{\"environment\":\"prod\", \"env_short\": \"p\"}]}"
-          elif [ ${{ github.event.pull_request.base.ref == 'release-uat' }} == true ]; then
-            matrixStringifiedObject="{\"include\":[{\"environment\":\"uat\", \"env_short\": \"u\"}]}"
-          else
-            matrixStringifiedObject=""
-          fi
-          
-          echo "matrix=$matrixStringifiedObject" >> $GITHUB_OUTPUT          
       
   deploy:
     name: "Deploy on ECS"
-    if: ${{ needs.build.outputs.matrix != '' }}
     needs: build
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
     strategy:
-        matrix: ${{ fromJson(needs.build.outputs.matrix) }}
-         
+        matrix:
+          include:
+          - environment: "uat"
+            env_short: "u"
+          - environment: "prod"
+            env_short: "p"
+
     continue-on-error: false
     environment: ${{ matrix.environment }}
     env:
       AWS_REGION: eu-south-1
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' }}
     steps:
       - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
       - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
@@ -93,20 +82,23 @@ jobs:
           path: target
 
       - name: Configure AWS Credentials
+        if: needs.build.outputs.new_release_published == 'true'
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
         with:
           role-to-assume: ${{ secrets.IAM_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       
       - name: Login to Amazon ECR
+        if: needs.build.outputs.new_release_published == 'true'
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@261a7de32bda11ba01f4d75c4ed6caf3739e54be
 
       - name: Build, tag, and push image to Amazon ECR
+        if: needs.build.outputs.new_release_published == 'true'
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: tokenizer-${{ matrix.env_short }}-ecr
+          ECR_REPOSITORY: pdv-${{ matrix.env_short }}-tokenizer
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -114,9 +106,10 @@ jobs:
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
       
       - name: Download task definition
+        if: needs.build.outputs.new_release_published == 'true'
         run: |
           aws ecs describe-task-definition \
-          --task-definition tokenizer-${{ matrix.env_short }}-task-tokenizer \
+          --task-definition pdv-${{ matrix.env_short }}-task-tokenizer \
           --query taskDefinition > ./task-definition.json
           echo $(cat ./task-definition.json | jq 'del(
                   .taskDefinitionArn,
@@ -129,17 +122,19 @@ jobs:
               )') > ./task-definition.json
 
       - name: Fill in the new image ID in the Amazon ECS task definition
+        if: needs.build.outputs.new_release_published == 'true'
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@61b0c00c3743b70987a73a1faf577f0d167d1574
         with:
           task-definition: ./task-definition.json
-          container-name: tokenizer-${{ matrix.env_short }}-container
+          container-name: pdv-${{ matrix.env_short }}-container
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
+        if: needs.build.outputs.new_release_published == 'true'
         uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: tokenizer-${{ matrix.env_short }}-service-tokenizer
-          cluster: tokenizer-${{ matrix.env_short }}-ecs-cluster
+          service: pdv-${{ matrix.env_short }}-service-tokenizer
+          cluster: pdv-${{ matrix.env_short }}-ecs-cluster
           wait-for-service-stability: true
