@@ -79,13 +79,8 @@ jobs:
       id-token: write
       contents: read
     strategy:
-        matrix:
-          include:
-          - environment: "uat"
-            env_short: "u"
-          - environment: "prod"
-            env_short: "p"
-
+        matrix: ${{ fromJson(needs.build.outputs.matrix) }}
+         
     continue-on-error: false
     environment: ${{ matrix.environment }}
     env:
