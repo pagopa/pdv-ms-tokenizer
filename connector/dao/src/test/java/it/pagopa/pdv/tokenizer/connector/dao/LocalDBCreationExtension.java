@@ -13,7 +13,7 @@ public class LocalDBCreationExtension implements BeforeAllCallback, AfterAllCall
     private DynamoDBProxyServer dynamoDBProxyServer;
 
     public LocalDBCreationExtension() {
-        System.setProperty("sqlite4java.library.path", "src/test/native-libs");
+        System.setProperty("sqlite4java.library.path", "target/test/native-libs");
     }
 
     @Override
