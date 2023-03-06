@@ -91,10 +91,13 @@ public class TokenizerController {
             notes = "${swagger.api.tokens.findPii.notes}")
     @GetMapping(value = "{token}/pii")
     public PiiResource findPii(@ApiParam("${swagger.model.token}")
-                               @PathVariable UUID token) {
+                               @PathVariable UUID token,
+                               @ApiParam("${swagger.model.namespace}")
+                               @RequestHeader(NAMESPACE_HEADER_NAME)
+                               String namespace) {
         log.trace("[findPii] start");
         log.debug("[findPii] inputs: token = {}", token);
-        String pii = tokenizerService.findPiiByToken(token.toString());
+        String pii = tokenizerService.findPiiByToken(token.toString(), namespace);
         PiiResource piiResource = new PiiResource();
         piiResource.setPii(pii);
         log.debug(CONFIDENTIAL_MARKER, "[findPii] output = {}", piiResource);

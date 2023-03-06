@@ -138,8 +138,9 @@ class TokenizerServiceImplTest {
     void findPiiByToken_nullToken() {
         // given
         String token = null;
+        String namespace = "namespace";
         // when
-        Executable executable = () -> tokenizerService.findPiiByToken(token);
+        Executable executable = () -> tokenizerService.findPiiByToken(token, namespace);
         // then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A token is required", e.getMessage());
@@ -151,14 +152,15 @@ class TokenizerServiceImplTest {
     void findPiiByToken_notFound() {
         // given
         String token = "token";
-        Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any()))
+        String namespace = "namespace";
+        Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.empty());
         // when
-        Executable executable = () -> tokenizerService.findPiiByToken(token);
+        Executable executable = () -> tokenizerService.findPiiByToken(token, namespace);
         // then
         assertThrows(ResourceNotFoundException.class, executable);
         Mockito.verify(tokenizerConnector, Mockito.times(1))
-                .findPiiByToken(token);
+                .findPiiByToken(token, namespace);
         Mockito.verifyNoMoreInteractions(tokenizerConnector);
     }
 
@@ -168,14 +170,16 @@ class TokenizerServiceImplTest {
         // given
         String token = "token";
         String piiStub = "pii";
-        Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any()))
+        String namespace = "namespace";
+
+        Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any(), Mockito.any()))
                 .thenReturn(Optional.of(piiStub));
         // when
-        String pii = tokenizerService.findPiiByToken(token);
+        String pii = tokenizerService.findPiiByToken(token, namespace);
         // then
         assertSame(piiStub, pii);
         Mockito.verify(tokenizerConnector, Mockito.times(1))
-                .findPiiByToken(token);
+                .findPiiByToken(token, namespace);
         Mockito.verifyNoMoreInteractions(tokenizerConnector);
     }
 

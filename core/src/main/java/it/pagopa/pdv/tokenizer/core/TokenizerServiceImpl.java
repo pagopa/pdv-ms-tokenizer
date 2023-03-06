@@ -49,11 +49,12 @@ class TokenizerServiceImpl implements TokenizerService {
 
 
     @Override
-    public String findPiiByToken(String token) {
+    public String findPiiByToken(String token, String namespace) {
         log.trace("[findPiiByToken] start");
-        log.debug("[findPiiByToken] inputs: token = {}", token);
+        log.debug("[findPiiByToken] inputs: token = {}, namespace = {}", token, namespace);
         Assert.hasText(token, "A token is required");
-        String pii = tokenizerConnector.findPiiByToken(token)
+        Assert.hasText(namespace, "A namespace is required");
+        String pii = tokenizerConnector.findPiiByToken(token, namespace)
                 .orElseThrow(ResourceNotFoundException::new);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "[findPiiByToken] output = {}", pii);
         log.trace("[findPiiByToken] end");

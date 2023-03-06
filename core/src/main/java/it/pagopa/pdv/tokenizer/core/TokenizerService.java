@@ -8,6 +8,6 @@ public interface TokenizerService {
 
     TokenDto findById(String pii, String namespace);
 
-    String findPiiByToken(String token);
+    String findPiiByToken(String token, String namespace);
 
 }

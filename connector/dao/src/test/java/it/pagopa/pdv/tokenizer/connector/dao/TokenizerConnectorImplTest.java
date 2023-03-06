@@ -3,7 +3,9 @@ package it.pagopa.pdv.tokenizer.connector.dao;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import it.pagopa.pdv.tokenizer.connector.dao.config.DaoTestConfig;
+import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -29,6 +31,12 @@ class TokenizerConnectorImplTest {
 
     @SpyBean
     private DynamoDBMapper dynamoDBMapper;
+
+
+    @BeforeEach
+    void init() {
+        DaoTestConfig.dynamoDBLocalSetup(amazonDynamoDB, dynamoDBMapper);
+    }
 
 
     @Test
@@ -129,8 +137,9 @@ class TokenizerConnectorImplTest {
     void findPiiByToken_nullToken() {
         // given
         String token = null;
+        String namespace = "namespace";
         // when
-        Executable executable = () -> tokenizerConnector.findPiiByToken(token);
+        Executable executable = () -> tokenizerConnector.findPiiByToken(token, namespace);
         // then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A token is required", e.getMessage());
@@ -144,7 +153,7 @@ class TokenizerConnectorImplTest {
         String namespace = "selfcare";
         TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken());
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), GlobalFiscalCodeToken.NAMESPACE);
         // then
         assertTrue(found.isPresent());
         assertEquals(pii, found.get());
@@ -158,10 +167,23 @@ class TokenizerConnectorImplTest {
         String namespace = "selfcare";
         TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken());
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), namespace);
         // then
         assertTrue(found.isPresent());
         assertEquals(pii, found.get());
+    }
+
+    @Test
+    void findPiiByToken_usingNotAllowedNamespacedToken() {
+        // given
+        String pii = "pii";
+        String namespace = "selfcare";
+        String notAllowedNamespace = "idpay";
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
+        // when
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace);
+        // then
+        assertFalse(found.isPresent());
     }
 
 }
