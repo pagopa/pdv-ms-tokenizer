@@ -2,6 +2,11 @@
 
 Spring Application implementing the **Tokenizer** microservice for the **Personal Data Vault** Project.
 
+This microservice works in conjunction with:
+
+- [pdv-ms-person](https://github.com/pagopa/pdv-ms-person)
+- [pdv-ms-user-registry](https://github.com/pagopa/pdv-ms-user-registry)
+
 ---
 
 ## Api Documentation 📖
@@ -62,22 +67,23 @@ From terminal, inside the **app** package:
 
 Set the following Environment Variables:
 
-| **Key**               | **Value**                                   |
-|-----------------------|---------------------------------------------|
-| APP_SERVER_PORT       | default: 8080                               |
-| APP_LOG_LEVEL         | default: DEBUG                              |
-| AWS_REGION            | *eu-south-1*                                |
-| AWS_ACCESS_KEY_ID     | AWS Access Key ID UAT tokenizer profile     |
-| AWS_SECRET_ACCESS_KEY | AWS Secret Access Key UAT tokenizer profile |
-| AWS_SESSION_TOKEN     | AWS Session Token UAT tokenizer profile     |
+| **Key**               | **Value**                                            |
+|-----------------------|------------------------------------------------------|
+| APP_SERVER_PORT       | default: 8080                                        |
+| APP_LOG_LEVEL         | default: DEBUG                                       |
+| AWS_REGION            | *eu-south-1*                                         |
+| AWS_ACCESS_KEY_ID     | AWS Access Key ID *ppa-tokenizer-data-vault-uat*     |
+| AWS_SECRET_ACCESS_KEY | AWS Secret Access Key *ppa-tokenizer-data-vault-uat* |
+| AWS_SESSION_TOKEN     | AWS Session Token *ppa-tokenizer-data-vault-uat*     |
 
 From terminal, inside the **app** package:
 ```
 ./mvnw spring-boot:run
 ```
 
-Notes: *When choosing the **port number** for this microservice, take into account that if you want to run this
-with **pdv-ms-person** and **pdv-ms-user-registry**, you'll need to choose a different port for each microservice.*
+Notes: *When choosing the **port number** for this microservice, take into account that if you want to test this
+in conjunction with **pdv-ms-person** and **pdv-ms-user-registry**, you'll need to choose a different port for each
+microservice.*
 
 ---
 
