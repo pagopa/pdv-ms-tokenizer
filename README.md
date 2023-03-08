@@ -30,22 +30,12 @@ See the [PROD here.](https://api.tokenizer.pdv.pagopa.it/docs/tokenizerpapis/ope
 - jdk-11
 - docker
 
-### How to compile
-
-```
-./mvnw clean install
-```
-
 ### How to run unit-tests
 
 using `junit`
 
 ```
-./mvnw test-compile
-```
-
-```
-./mvnw test
+./mvnw clean test
 ```
 
 ### How to run locally with Local DynamoDB 🚀
@@ -63,6 +53,7 @@ Then, set the following Environment Variables:
 | APP_SERVER_PORT | default: 8080  |
 | APP_LOG_LEVEL   | default: DEBUG |
 
+From terminal, inside the **app** package:
 ```
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev-local
 ```
@@ -81,6 +72,7 @@ Set the following Environment Variables:
 | AWS_SECRET_ACCESS_KEY | AWS Secret Access Key UAT tokenizer profile |
 | AWS_SESSION_TOKEN     | AWS Session Token UAT tokenizer profile     |
 
+From terminal, inside the **app** package:
 ```
 ./mvnw spring-boot:run
 ```
