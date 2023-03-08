@@ -4,6 +4,8 @@ on:
     branches:
       - main
       - release-*
+    paths-ignore:
+      - "**.md"
 jobs:
   build:
     runs-on: ubuntu-22.04
