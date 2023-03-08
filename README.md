@@ -66,7 +66,6 @@ Set the following Environment Variables:
 |-----------------------|---------------------------------------------|
 | APP_SERVER_PORT       | default: 8080                               |
 | APP_LOG_LEVEL         | default: DEBUG                              |
-| AWS_PROFILE           | UAT AWS tokenizer profile name              |
 | AWS_REGION            | *eu-south-1*                                |
 | AWS_ACCESS_KEY_ID     | AWS Access Key ID UAT tokenizer profile     |
 | AWS_SECRET_ACCESS_KEY | AWS Secret Access Key UAT tokenizer profile |
