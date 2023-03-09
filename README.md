@@ -53,10 +53,10 @@ docker run -p 8000:8000 amazon/dynamodb-local
 
 Then, set the following Environment Variables:
 
-| **Key**                    | **Value**      |
-|----------------------------|----------------|
-| APP_SERVER_PORT[^app_port] | default: 8080  |
-| APP_LOG_LEVEL              | default: DEBUG |
+| **Key**         | **Value**                |
+|-----------------|--------------------------|
+| APP_SERVER_PORT | default: 8080[^app_port] |
+| APP_LOG_LEVEL   | default: DEBUG           |
 
 [^app_port]: When running multiple microservices simultaneously, a different port must be chosen for each one.
 
@@ -69,14 +69,14 @@ From terminal, inside the **app** package:
 
 Set the following Environment Variables:
 
-| **Key**                    | **Value**                                                      |
-|----------------------------|----------------------------------------------------------------|
-| APP_SERVER_PORT[^app_port] | default: 8080                                                  |
-| APP_LOG_LEVEL              | default: DEBUG                                                 |
-| AWS_REGION                 | *eu-south-1*                                                   |
-| AWS_ACCESS_KEY_ID          | AWS Access Key ID *ppa-tokenizer-data-vault-uat*[^aws_sso]     |
-| AWS_SECRET_ACCESS_KEY      | AWS Secret Access Key *ppa-tokenizer-data-vault-uat*[^aws_sso] |
-| AWS_SESSION_TOKEN          | AWS Session Token *ppa-tokenizer-data-vault-uat*[^aws_sso]     |
+| **Key**               | **Value**                                                      |
+|-----------------------|----------------------------------------------------------------|
+| APP_SERVER_PORT       | default: 8080[^app_port]                                       |
+| APP_LOG_LEVEL         | default: DEBUG                                                 |
+| AWS_REGION            | *eu-south-1*                                                   |
+| AWS_ACCESS_KEY_ID     | AWS Access Key ID *ppa-tokenizer-data-vault-uat*[^aws_sso]     |
+| AWS_SECRET_ACCESS_KEY | AWS Secret Access Key *ppa-tokenizer-data-vault-uat*[^aws_sso] |
+| AWS_SESSION_TOKEN     | AWS Session Token *ppa-tokenizer-data-vault-uat*[^aws_sso]     |
 
 [^aws_sso]: For info about AWS SSO login, see [here](https://pagopa.atlassian.net/wiki/spaces/DEVOPS/pages/466846955/AWS+-+Users+groups+and+roles#Users-and-groups---DevOps-team).
 
