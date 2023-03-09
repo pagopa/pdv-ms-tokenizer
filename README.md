@@ -53,10 +53,12 @@ docker run -p 8000:8000 amazon/dynamodb-local
 
 Then, set the following Environment Variables:
 
-| **Key**         | **Value**      |
-|-----------------|----------------|
-| APP_SERVER_PORT | default: 8080  |
-| APP_LOG_LEVEL   | default: DEBUG |
+| **Key**                    | **Value**      |
+|----------------------------|----------------|
+| APP_SERVER_PORT[^app_port] | default: 8080  |
+| APP_LOG_LEVEL              | default: DEBUG |
+
+[^app_port]: When running multiple microservices simultaneously, a different port must be chosen for each one.
 
 From terminal, inside the **app** package:
 ```
@@ -67,25 +69,21 @@ From terminal, inside the **app** package:
 
 Set the following Environment Variables:
 
-| **Key**               | **Value**                                                |
-|-----------------------|----------------------------------------------------------|
-| APP_SERVER_PORT       | default: 8080                                            |
-| APP_LOG_LEVEL         | default: DEBUG                                           |
-| AWS_REGION            | *eu-south-1*                                             |
-| AWS_ACCESS_KEY_ID     | AWS Access Key ID *ppa-tokenizer-data-vault-uat*[^1]     |
-| AWS_SECRET_ACCESS_KEY | AWS Secret Access Key *ppa-tokenizer-data-vault-uat*[^1] |
-| AWS_SESSION_TOKEN     | AWS Session Token *ppa-tokenizer-data-vault-uat*[^1]     |
+| **Key**                    | **Value**                                                      |
+|----------------------------|----------------------------------------------------------------|
+| APP_SERVER_PORT[^app_port] | default: 8080                                                  |
+| APP_LOG_LEVEL              | default: DEBUG                                                 |
+| AWS_REGION                 | *eu-south-1*                                                   |
+| AWS_ACCESS_KEY_ID          | AWS Access Key ID *ppa-tokenizer-data-vault-uat*[^aws_sso]     |
+| AWS_SECRET_ACCESS_KEY      | AWS Secret Access Key *ppa-tokenizer-data-vault-uat*[^aws_sso] |
+| AWS_SESSION_TOKEN          | AWS Session Token *ppa-tokenizer-data-vault-uat*[^aws_sso]     |
 
-[^1]: For info about AWS SSO login, see [here](https://pagopa.atlassian.net/wiki/spaces/DEVOPS/pages/466846955/AWS+-+Users+groups+and+roles#Users-and-groups---DevOps-team).
+[^aws_sso]: For info about AWS SSO login, see [here](https://pagopa.atlassian.net/wiki/spaces/DEVOPS/pages/466846955/AWS+-+Users+groups+and+roles#Users-and-groups---DevOps-team).
 
 From terminal, inside the **app** package:
 ```
 ./mvnw spring-boot:run
 ```
-
-Notes: *When choosing the **port number** for this microservice, take into account that if you want to test this
-in conjunction with **pdv-ms-person** and **pdv-ms-user-registry**, you'll need to choose a different port for each
-microservice.*
 
 ---
 
