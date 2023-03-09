@@ -4,6 +4,11 @@ on:
     branches:
       - main
       - release-*
+    paths:
+      - "**/src/**"
+      - "**pom.xml"
+      - ".github/workflows/code-review.yml"
+
 jobs:
   build:
     runs-on: ubuntu-22.04
