@@ -67,14 +67,16 @@ From terminal, inside the **app** package:
 
 Set the following Environment Variables:
 
-| **Key**               | **Value**                                            |
-|-----------------------|------------------------------------------------------|
-| APP_SERVER_PORT       | default: 8080                                        |
-| APP_LOG_LEVEL         | default: DEBUG                                       |
-| AWS_REGION            | *eu-south-1*                                         |
-| AWS_ACCESS_KEY_ID     | AWS Access Key ID *ppa-tokenizer-data-vault-uat*     |
-| AWS_SECRET_ACCESS_KEY | AWS Secret Access Key *ppa-tokenizer-data-vault-uat* |
-| AWS_SESSION_TOKEN     | AWS Session Token *ppa-tokenizer-data-vault-uat*     |
+| **Key**               | **Value**                                                |
+|-----------------------|----------------------------------------------------------|
+| APP_SERVER_PORT       | default: 8080                                            |
+| APP_LOG_LEVEL         | default: DEBUG                                           |
+| AWS_REGION            | *eu-south-1*                                             |
+| AWS_ACCESS_KEY_ID     | AWS Access Key ID *ppa-tokenizer-data-vault-uat*[^1]     |
+| AWS_SECRET_ACCESS_KEY | AWS Secret Access Key *ppa-tokenizer-data-vault-uat*[^1] |
+| AWS_SESSION_TOKEN     | AWS Session Token *ppa-tokenizer-data-vault-uat*[^1]     |
+
+[^1]: For info about AWS SSO login, see [here](https://pagopa.atlassian.net/wiki/spaces/DEVOPS/pages/466846955/AWS+-+Users+groups+and+roles#Users-and-groups---DevOps-team).
 
 From terminal, inside the **app** package:
 ```
