@@ -2,10 +2,16 @@
 
 Spring Application implementing the **Tokenizer** microservice for the **Personal Data Vault** Project.
 
-This microservice works in conjunction with:
+---
 
-- [pdv-ms-person](https://github.com/pagopa/pdv-ms-person)
+## Dependencies
+
+Upstream:
 - [pdv-ms-user-registry](https://github.com/pagopa/pdv-ms-user-registry)
+- PagoPA products
+
+Downstream:
+- [Amazon DynamoDB](https://aws.amazon.com/dynamodb/?nc1=h_ls)
 
 ---
 
