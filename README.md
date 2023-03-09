@@ -82,7 +82,7 @@ Set the following Environment Variables:
 
 From terminal, inside the **app** package:
 ```
-./mvnw spring-boot:run
+../mvnw spring-boot:run
 ```
 
 ---
