@@ -39,7 +39,6 @@ See the [PROD here.](https://api.tokenizer.pdv.pagopa.it/docs/tokenizerpapis/ope
 - git
 - maven
 - jdk-11
-- docker
 
 ### How to run unit-tests
 
@@ -51,11 +50,13 @@ using `junit`
 
 ### How to run locally with Local DynamoDB 🚀
 
-First, start a docker container with official Amazon DynamoDB image:
+First, download from [here](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html) the local version of DynamoDB.
 
+Then, run the following command:
 ```
-docker run -p 8000:8000 amazon/dynamodb-local
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 ```
+The above command will start an *in-memory* DynamoDB local version on port **8000**.
 
 Then, set the following Environment Variables:
 

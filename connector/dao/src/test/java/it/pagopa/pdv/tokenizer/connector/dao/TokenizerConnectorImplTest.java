@@ -5,7 +5,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import it.pagopa.pdv.tokenizer.connector.dao.config.DaoTestConfig;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -31,13 +30,6 @@ class TokenizerConnectorImplTest {
 
     @SpyBean
     private DynamoDBMapper dynamoDBMapper;
-
-
-    @BeforeEach
-    void init() {
-        DaoTestConfig.dynamoDBLocalSetup(amazonDynamoDB, dynamoDBMapper);
-    }
-
 
     @Test
     void save_nullPii() {
