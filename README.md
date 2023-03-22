@@ -56,7 +56,26 @@ Then, run the following command:
 ```
 java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 ```
-The above command will start an *in-memory* DynamoDB local version on port **8000**.
+The above command will start a DynamoDB local version on port **8000**.
+Check [here](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html) the documentation.
+
+Now, we need to setup the table on DynamoDB:
+
+Launch tests
+```
+./mvnw clean test
+```
+After tests results, in the directory *connector/dao/target/test/dynamodb-local-template* you'll find *Token.json* file which we can use to create the Token table on the local Dynamo instance with the following **aws cli** command:
+
+```
+aws dynamodb create-table --cli-input-json file://<BASE_PATH>/Token.json
+```
+To run the above command, you'll first need to export the following Environment Variables, with dummy values:
+
+- AWS_REGION
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY_ID
+
 
 Then, set the following Environment Variables:
 
