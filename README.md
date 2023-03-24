@@ -59,6 +59,11 @@ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
 The above command will start a DynamoDB local version on port **8000**.
 Check [here](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.UsageNotes.html) the documentation.
 
+**N.B.** as an alternative to DynamoDBLocal, if you have a Docker engine installed, you can start a local docker container with official Amazon DynamoDB image:
+
+```
+docker run -p 8000:8000 amazon/dynamodb-local
+```
 Now, we need to setup the table on DynamoDB:
 
 Launch the following test to generate the CreateTableRequest
