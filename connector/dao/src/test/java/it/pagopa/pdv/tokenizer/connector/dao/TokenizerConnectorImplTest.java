@@ -32,12 +32,10 @@ class TokenizerConnectorImplTest {
     @SpyBean
     private DynamoDBMapper dynamoDBMapper;
 
-
     @BeforeEach
     void init() {
         DaoTestConfig.dynamoDBLocalSetup(amazonDynamoDB, dynamoDBMapper);
     }
-
 
     @Test
     void save_nullPii() {
