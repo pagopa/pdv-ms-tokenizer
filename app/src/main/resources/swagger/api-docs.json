@@ -156,6 +156,14 @@
             "type" : "string",
             "format" : "uuid"
           }
+        }, {
+          "name" : "x-pagopa-namespace",
+          "in" : "header",
+          "description" : "Caller visibility context",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
         } ],
         "responses" : {
           "200" : {
