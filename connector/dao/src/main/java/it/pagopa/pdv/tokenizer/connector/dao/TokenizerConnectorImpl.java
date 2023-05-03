@@ -12,7 +12,7 @@ import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.NamespacedFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.Status;
-import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestException;
+import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestsException;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Marker;
@@ -80,7 +80,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             }
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestException();
+            throw new TooManyRequestsException(e.getCause());
         }
         return rootToken;
     }
@@ -108,7 +108,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             }
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestException();
+            throw new TooManyRequestsException(e.getCause());
         }
         return token;
     }
@@ -132,7 +132,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                             .buildForUpdate()));
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestException();
+            throw new TooManyRequestsException(e.getCause());
         }
 
     }
@@ -156,7 +156,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                     });
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestException();
+            throw new TooManyRequestsException(e.getCause());
         }
         log.debug("[findById] output = {}", result);
         log.trace("[findById] end");
@@ -190,7 +190,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             }
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestException();
+            throw new TooManyRequestsException(e.getCause());
         }
         log.debug(CONFIDENTIAL_MARKER, "[findPiiByToken] output = {}", pii);
         log.trace("[findPiiByToken] end");
