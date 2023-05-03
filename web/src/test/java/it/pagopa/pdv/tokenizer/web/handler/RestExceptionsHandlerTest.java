@@ -1,5 +1,6 @@
 package it.pagopa.pdv.tokenizer.web.handler;
 
+import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestException;
 import it.pagopa.pdv.tokenizer.core.exception.ResourceNotFoundException;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
 import org.junit.jupiter.api.Test;
@@ -148,6 +149,23 @@ class RestExceptionsHandlerTest {
         assertNotNull(responseEntity.getBody());
         assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
         assertEquals(NOT_FOUND.value(), responseEntity.getBody().getStatus());
+    }
+    @Test
+    void handleTooManyRequestsException(){
+        // given
+        TooManyRequestException mockException = Mockito.mock(TooManyRequestException.class);
+        Mockito.when(mockException.getMessage())
+                .thenReturn(DETAIL_MESSAGE);
+
+        // when
+        ResponseEntity<Problem> responseEntity = handler.handleTooManyRequestException(mockException);
+        // then
+        assertNotNull(responseEntity);
+        assertEquals(TOO_MANY_REQUESTS,responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(DETAIL_MESSAGE,responseEntity.getBody().getDetail());
+        assertEquals(TOO_MANY_REQUESTS.value(),responseEntity.getBody().getStatus());
+
     }
 
 }
