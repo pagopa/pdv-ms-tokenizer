@@ -80,7 +80,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             }
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e.getCause());
+            throw new TooManyRequestsException(e);
         }
         return rootToken;
     }
@@ -108,7 +108,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             }
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e.getCause());
+            throw new TooManyRequestsException(e);
         }
         return token;
     }
@@ -132,7 +132,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                             .buildForUpdate()));
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e.getCause());
+            throw new TooManyRequestsException(e);
         }
 
     }
@@ -156,7 +156,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                     });
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e.getCause());
+            throw new TooManyRequestsException(e);
         }
         log.debug("[findById] output = {}", result);
         log.trace("[findById] end");
@@ -190,7 +190,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             }
         }
         catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e.getCause());
+            throw new TooManyRequestsException(e);
         }
         log.debug(CONFIDENTIAL_MARKER, "[findPiiByToken] output = {}", pii);
         log.trace("[findPiiByToken] end");
