@@ -3,7 +3,7 @@ package it.pagopa.pdv.tokenizer.connector.dao;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 
 
-public class DummyConnectorImpl {
+public class TokenizerConnectorImplDummy {
     public void notThrowingProvisionedThroughputExceededException() {
 
     }

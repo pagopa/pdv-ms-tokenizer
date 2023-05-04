@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorExceptionHandlingAspect {
 
-    @AfterThrowing(pointcut = "execution(* it.pagopa.pdv.tokenizer.connector.dao.*.*(..))", throwing = "ex")
+    @AfterThrowing(pointcut = "execution(public * it.pagopa.pdv.tokenizer.connector.dao.TokenizerConnectorImpl*.*(..))", throwing = "ex")
     public void handleProvisionedThroughputExceededExceptionCall(ProvisionedThroughputExceededException ex){
         log.trace("[ConnectorExceptionHandlingAspect] handleProvisionedThroughputExceededExceptionCall");
         throw new TooManyRequestsException(ex);
