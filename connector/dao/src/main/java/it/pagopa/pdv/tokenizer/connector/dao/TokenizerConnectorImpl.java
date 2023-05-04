@@ -6,13 +6,11 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
 import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.NamespacedFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.Status;
-import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestsException;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Marker;
@@ -79,9 +77,6 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                         GlobalFiscalCodeToken.Fields.status);
             }
         }
-        catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e);
-        }
         return rootToken;
     }
 
@@ -107,9 +102,6 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                         NamespacedFiscalCodeToken.Fields.status);
             }
         }
-        catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e);
-        }
         return token;
     }
 
@@ -121,7 +113,6 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                 hashKeyValue,
                 rangeKeyName,
                 rangeKeyValue);
-        try{
             table.updateItem(new UpdateItemSpec()
                     .withPrimaryKey(primaryKey)
                     .withExpressionSpec(new ExpressionSpecBuilder()
@@ -130,10 +121,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                                     .and(attribute_exists(rangeKeyName))
                                     .and(S(statusFieldName).eq(Status.PENDING_DELETE.toString())))
                             .buildForUpdate()));
-        }
-        catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e);
-        }
+
 
     }
 
@@ -145,19 +133,15 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         Assert.hasText(pii, "A Private Data is required");
         Assert.hasText(namespace, "A Namespace is required");
         Optional<TokenDto> result;
-        try {
-            result = Optional.ofNullable(namespacedFiscalCodeTableMapper.load(pii, namespace))
-                    .filter(p -> Status.ACTIVE.equals(p.getStatus()))
-                    .map(namespacedFiscalCodeToken -> {
-                        TokenDto tokenDto = new TokenDto();
-                        tokenDto.setToken(namespacedFiscalCodeToken.getToken());
-                        tokenDto.setRootToken(namespacedFiscalCodeToken.getGlobalToken());
-                        return tokenDto;
-                    });
-        }
-        catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e);
-        }
+        result = Optional.ofNullable(namespacedFiscalCodeTableMapper.load(pii, namespace))
+                .filter(p -> Status.ACTIVE.equals(p.getStatus()))
+                .map(namespacedFiscalCodeToken -> {
+                    TokenDto tokenDto = new TokenDto();
+                    tokenDto.setToken(namespacedFiscalCodeToken.getToken());
+                    tokenDto.setRootToken(namespacedFiscalCodeToken.getGlobalToken());
+                    return tokenDto;
+                });
+
         log.debug("[findById] output = {}", result);
         log.trace("[findById] end");
         return result;
@@ -171,15 +155,14 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         Assert.hasText(token, "A token is required");
         Assert.hasText(namespace, "A namespace is required");
         Optional<String> pii = Optional.empty();
-        try {
-            Index index = table.getIndex("gsi_token");
-            ItemCollection<QueryOutcome> itemCollection = index.query(new QuerySpec()
-                    .withHashKey(NamespacedFiscalCodeToken.Fields.token, token)
-                    .withExpressionSpec(new ExpressionSpecBuilder()
-                            .withCondition(S(NamespacedFiscalCodeToken.Fields.status).ne(Status.PENDING_DELETE.toString())
-                                    .and(S(namespacedFiscalCodeTableMapper.rangeKey().name()).eq(namespace)))
-                            .addProjection(namespacedFiscalCodeTableMapper.hashKey().name())
-                            .buildForQuery())
+        Index index = table.getIndex("gsi_token");
+        ItemCollection<QueryOutcome> itemCollection = index.query(new QuerySpec()
+                .withHashKey(NamespacedFiscalCodeToken.Fields.token, token)
+                .withExpressionSpec(new ExpressionSpecBuilder()
+                        .withCondition(S(NamespacedFiscalCodeToken.Fields.status).ne(Status.PENDING_DELETE.toString())
+                                .and(S(namespacedFiscalCodeTableMapper.rangeKey().name()).eq(namespace)))
+                        .addProjection(namespacedFiscalCodeTableMapper.hashKey().name())
+                        .buildForQuery())
             );
             Iterator<Page<Item, QueryOutcome>> iterator = itemCollection.pages().iterator();
             if (iterator.hasNext()) {
@@ -188,10 +171,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                     pii = Optional.ofNullable(page.getLowLevelResult().getItems().get(0).getString(namespacedFiscalCodeTableMapper.hashKey().name()));
                 }
             }
-        }
-        catch(ProvisionedThroughputExceededException e){
-            throw new TooManyRequestsException(e);
-        }
+
         log.debug(CONFIDENTIAL_MARKER, "[findPiiByToken] output = {}", pii);
         log.trace("[findPiiByToken] end");
         return pii;
