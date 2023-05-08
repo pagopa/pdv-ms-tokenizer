@@ -1,28 +1,30 @@
 package it.pagopa.pdv.tokenizer.connector.dao;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTableMapper;
-import com.amazonaws.services.dynamodbv2.document.*;
-import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
-import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
-import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
+import io.reactivex.rxjava3.core.Flowable;
 import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.NamespacedFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.Status;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import software.amazon.awssdk.core.async.SdkPublisher;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 
-import java.util.Iterator;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
-import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.S;
-import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attribute_exists;
+import static software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.keyEqualTo;
 
 @Slf4j
 @Service
@@ -31,16 +33,20 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
     public static final String TABLE_NAME = "Token";
     private static final Marker CONFIDENTIAL_MARKER = MarkerFactory.getMarker("CONFIDENTIAL");
 
-    private final Table table;
-    private final DynamoDBTableMapper<NamespacedFiscalCodeToken, String, String> namespacedFiscalCodeTableMapper;
-    private final DynamoDBTableMapper<GlobalFiscalCodeToken, String, String> globalFiscalCodeTableMapper;
+    private final DynamoDbAsyncClient dbAsyncClient;
+    private final BeanTableSchema<NamespacedFiscalCodeToken> namespacedTokenTableSchema;
+    private final DynamoDbAsyncTable<NamespacedFiscalCodeToken> namespacedTokenTable;
+    private final BeanTableSchema<GlobalFiscalCodeToken> globalTokenTableSchema;
+    private final DynamoDbAsyncTable<GlobalFiscalCodeToken> globalTokenTable;
 
 
-    TokenizerConnectorImpl(DynamoDBMapper dynamoDBMapper, DynamoDB dynamoDB) {
+    TokenizerConnectorImpl(DynamoDbAsyncClient dbAsyncClient, DynamoDbEnhancedAsyncClient dbEnhancedAsyncClient) {
+        this.dbAsyncClient = dbAsyncClient;
         log.trace("Initializing {}", TokenizerConnectorImpl.class.getSimpleName());
-        table = dynamoDB.getTable(TABLE_NAME);
-        namespacedFiscalCodeTableMapper = dynamoDBMapper.newTableMapper(NamespacedFiscalCodeToken.class);
-        globalFiscalCodeTableMapper = dynamoDBMapper.newTableMapper(GlobalFiscalCodeToken.class);
+        namespacedTokenTableSchema = TableSchema.fromBean(NamespacedFiscalCodeToken.class);
+        namespacedTokenTable = dbEnhancedAsyncClient.table(TABLE_NAME, namespacedTokenTableSchema);
+        globalTokenTableSchema = TableSchema.fromBean(GlobalFiscalCodeToken.class);
+        globalTokenTable = dbEnhancedAsyncClient.table(TABLE_NAME, globalTokenTableSchema);
     }
 
 
@@ -59,78 +65,39 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
     }
 
 
+    @SneakyThrows
     private String saveGlobalToken(String pii) {
-        String rootToken;
         GlobalFiscalCodeToken globalFiscalCodeToken = new GlobalFiscalCodeToken();
         globalFiscalCodeToken.setPii(pii);
-        try {
-            globalFiscalCodeTableMapper.saveIfNotExists(globalFiscalCodeToken);//TODO: good for performance??
-            rootToken = globalFiscalCodeToken.getToken();
-        } catch (ConditionalCheckFailedException e) {
-            GlobalFiscalCodeToken globalTokenFound = globalFiscalCodeTableMapper.load(globalFiscalCodeToken.getPii(), globalFiscalCodeToken.getNamespace());
-            rootToken = globalTokenFound.getToken();
-            if (Status.PENDING_DELETE.equals(globalTokenFound.getStatus())) {
-                reactivateToken(globalFiscalCodeTableMapper.hashKey().name(),
-                        globalFiscalCodeToken.getPii(),
-                        globalFiscalCodeTableMapper.rangeKey().name(),
-                        globalFiscalCodeToken.getNamespace(),
-                        GlobalFiscalCodeToken.Fields.status);
-            }
-        }
-        return rootToken;
+        CompletableFuture<GlobalFiscalCodeToken> completableFuture = globalTokenTable.updateItem(globalFiscalCodeToken);//TODO: good for performance??
+        return completableFuture.get().getToken();
     }
 
 
+    @SneakyThrows
     private String saveNamespacedToken(String pii, String namespace, String rootToken) {
-        String token;
         NamespacedFiscalCodeToken namespacedFiscalCodeToken = new NamespacedFiscalCodeToken();
         namespacedFiscalCodeToken.setPii(pii);
         namespacedFiscalCodeToken.setNamespace(namespace);
         namespacedFiscalCodeToken.setGlobalToken(rootToken);
-        try {
-            namespacedFiscalCodeTableMapper.saveIfNotExists(namespacedFiscalCodeToken);//TODO: good for performance??
-            token = namespacedFiscalCodeToken.getToken();
-        } catch (ConditionalCheckFailedException e) {
-            NamespacedFiscalCodeToken namespacedTokenFound =
-                    namespacedFiscalCodeTableMapper.load(namespacedFiscalCodeToken.getPii(), namespacedFiscalCodeToken.getNamespace());
-            token = namespacedTokenFound.getToken();
-            if (Status.PENDING_DELETE.equals(namespacedTokenFound.getStatus())) {
-                reactivateToken(namespacedFiscalCodeTableMapper.hashKey().name(),
-                        namespacedFiscalCodeToken.getPii(),
-                        namespacedFiscalCodeTableMapper.rangeKey().name(),
-                        namespacedFiscalCodeToken.getNamespace(),
-                        NamespacedFiscalCodeToken.Fields.status);
-            }
-        }
-        return token;
+        CompletableFuture<NamespacedFiscalCodeToken> completableFuture = namespacedTokenTable.updateItem(namespacedFiscalCodeToken);//TODO: good for performance??
+        return completableFuture.get().getToken();
     }
 
 
-    private void reactivateToken(String hashKeyName, Object hashKeyValue,
-                                 String rangeKeyName, Object rangeKeyValue,
-                                 String statusFieldName) {
-        PrimaryKey primaryKey = new PrimaryKey(hashKeyName,
-                hashKeyValue,
-                rangeKeyName,
-                rangeKeyValue);
-        table.updateItem(new UpdateItemSpec()
-                .withPrimaryKey(primaryKey)
-                .withExpressionSpec(new ExpressionSpecBuilder()
-                        .addUpdate(S(statusFieldName).set(Status.ACTIVE.toString()))
-                        .withCondition(attribute_exists(hashKeyName)
-                                .and(attribute_exists(rangeKeyName))
-                                .and(S(statusFieldName).eq(Status.PENDING_DELETE.toString())))
-                        .buildForUpdate()));
-    }
-
-
+    @SneakyThrows
     @Override
     public Optional<TokenDto> findById(String pii, String namespace) {
         log.trace("[findById] start");
         log.debug(CONFIDENTIAL_MARKER, "[findById] inputs: pii = {}, namespace = {}", pii, namespace);
         Assert.hasText(pii, "A Private Data is required");
         Assert.hasText(namespace, "A Namespace is required");
-        Optional<TokenDto> result = Optional.ofNullable(namespacedFiscalCodeTableMapper.load(pii, namespace))
+        Key key = Key.builder()
+                .partitionValue(pii)
+                .sortValue(namespace)
+                .build();
+        CompletableFuture<NamespacedFiscalCodeToken> response = namespacedTokenTable.getItem(key);
+        Optional<TokenDto> result = Optional.ofNullable(response.get())
                 .filter(p -> Status.ACTIVE.equals(p.getStatus()))
                 .map(namespacedFiscalCodeToken -> {
                     TokenDto tokenDto = new TokenDto();
@@ -150,23 +117,18 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         log.debug("[findPiiByToken] inputs: token = {}, namespace = {}", token, namespace);
         Assert.hasText(token, "A token is required");
         Assert.hasText(namespace, "A namespace is required");
-        Optional<String> pii = Optional.empty();
-        Index index = table.getIndex("gsi_token");
-        ItemCollection<QueryOutcome> itemCollection = index.query(new QuerySpec()
-                .withHashKey(NamespacedFiscalCodeToken.Fields.token, token)
-                .withExpressionSpec(new ExpressionSpecBuilder()
-                        .withCondition(S(NamespacedFiscalCodeToken.Fields.status).ne(Status.PENDING_DELETE.toString())
-                                .and(S(namespacedFiscalCodeTableMapper.rangeKey().name()).eq(namespace)))
-                        .addProjection(namespacedFiscalCodeTableMapper.hashKey().name())
-                        .buildForQuery())
-        );
-        Iterator<Page<Item, QueryOutcome>> iterator = itemCollection.pages().iterator();
-        if (iterator.hasNext()) {
-            Page<Item, QueryOutcome> page = iterator.next();
-            if (page.getLowLevelResult().getItems().size() == 1) {
-                pii = Optional.ofNullable(page.getLowLevelResult().getItems().get(0).getString(namespacedFiscalCodeTableMapper.hashKey().name()));
-            }
-        }
+        SdkPublisher<Page<NamespacedFiscalCodeToken>> publisher = namespacedTokenTable.index("gsi_token")
+                .query(queryBuilder ->
+                        queryBuilder.queryConditional(keyEqualTo(keyBuilder ->
+                                keyBuilder.partitionValue(token))));
+        final Optional<String> pii = Flowable.fromPublisher(publisher)
+                .flatMapIterable(Page::items)
+                .filter(namespacedToken -> namespace.equals(namespacedToken.getNamespace()))
+                .filter(namespacedToken -> !Status.PENDING_DELETE.equals(namespacedToken.getStatus()))
+                .map(NamespacedFiscalCodeToken::getPii)
+                .map(Optional::ofNullable)
+                .first(Optional.empty())
+                .blockingGet();
         log.debug(CONFIDENTIAL_MARKER, "[findPiiByToken] output = {}", pii);
         log.trace("[findPiiByToken] end");
         return pii;
