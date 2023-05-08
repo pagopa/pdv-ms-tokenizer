@@ -1,7 +1,5 @@
 package it.pagopa.pdv.tokenizer.connector.dao;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import it.pagopa.pdv.tokenizer.connector.dao.config.DaoTestConfig;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
@@ -13,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 
 import java.util.Optional;
 
@@ -27,14 +27,14 @@ class TokenizerConnectorImplTest {
     private TokenizerConnectorImpl tokenizerConnector;
 
     @SpyBean
-    private AmazonDynamoDB amazonDynamoDB;
+    private DynamoDbAsyncClient dynamoDbAsyncClient;
 
     @SpyBean
-    private DynamoDBMapper dynamoDBMapper;
+    private DynamoDbEnhancedAsyncClient dbEnhancedAsyncClient;
 
     @BeforeEach
     void init() {
-        DaoTestConfig.dynamoDBLocalSetup(amazonDynamoDB, dynamoDBMapper);
+        DaoTestConfig.dynamoDBLocalSetup(dynamoDbAsyncClient, dbEnhancedAsyncClient);
     }
 
     @Test
