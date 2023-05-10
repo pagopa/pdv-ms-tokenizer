@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,14 +69,20 @@ class TokenizerConnectorImplTest {
         String pii = "savePii";
         String namespace = "saveSelfcare";
         // when
-        TokenDto savedNewTokenDto = tokenizerConnector.save(pii, namespace);
-        TokenDto savedExistingTokenDto = tokenizerConnector.save(pii, namespace);
-        // then
-        assertNotNull(savedNewTokenDto);
-        assertNotNull(savedNewTokenDto.getRootToken());
-        assertNotNull(savedNewTokenDto.getToken());
-        assertEquals(savedNewTokenDto.getRootToken(), savedExistingTokenDto.getRootToken());
-        assertEquals(savedNewTokenDto.getToken(), savedExistingTokenDto.getToken());
+        tokenizerConnector.save(pii, namespace)
+                .doOnSuccess(savedNewTokenDto ->
+                        StepVerifier.create(tokenizerConnector.save(pii, namespace)
+                                        .doOnNext(__ -> tokenizerConnector.save(pii, namespace)))
+                                .assertNext(savedExistingTokenDto -> {
+                                    // then
+                                    assertNotNull(savedNewTokenDto);
+                                    assertNotNull(savedNewTokenDto.getRootToken());
+                                    assertNotNull(savedNewTokenDto.getToken());
+                                    assertEquals(savedNewTokenDto.getRootToken(), savedExistingTokenDto.getRootToken());
+                                    assertEquals(savedNewTokenDto.getToken(), savedExistingTokenDto.getToken());
+                                })
+                                .verifyComplete())
+                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
     }
 
     @Test
@@ -111,9 +117,10 @@ class TokenizerConnectorImplTest {
         String pii = "piiNotFound";
         String namespace = "selfcare";
         // when
-        Optional<TokenDto> found = tokenizerConnector.findById(pii, namespace);
+        Mono<TokenDto> found = tokenizerConnector.findById(pii, namespace);
         // then
-        assertTrue(found.isEmpty());
+        StepVerifier.create(found)
+                .expectComplete();
     }
 
 
@@ -122,13 +129,18 @@ class TokenizerConnectorImplTest {
         // given
         String pii = "savedPii";
         String namespace = "savedSelfcare";
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<TokenDto> found = tokenizerConnector.findById(pii, namespace);
-        // then
-        assertTrue(found.isPresent());
-        assertEquals(tokenDto.getRootToken(), found.get().getRootToken());
-        assertEquals(tokenDto.getToken(), found.get().getToken());
+        tokenizerConnector.save(pii, namespace)
+                .doOnSuccess(tokenDto ->
+                        StepVerifier.create(tokenizerConnector.findById(pii, namespace))
+                                .assertNext(found -> {
+                                    // then
+                                    assertNotNull(found);
+                                    assertEquals(tokenDto.getRootToken(), found.getRootToken());
+                                    assertEquals(tokenDto.getToken(), found.getToken());
+                                })
+                                .verifyComplete())
+                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
     }
 
     @Test
@@ -149,12 +161,13 @@ class TokenizerConnectorImplTest {
         // given
         String pii = "pii";
         String namespace = "selfcare";
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), GlobalFiscalCodeToken.NAMESPACE);
-        // then
-        assertTrue(found.isPresent());
-        assertEquals(pii, found.get());
+        tokenizerConnector.save(pii, namespace)
+                .doOnSuccess(tokenDto ->
+                        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), GlobalFiscalCodeToken.NAMESPACE))
+                                .expectNext(pii)
+                                .verifyComplete())
+                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
     }
 
 
@@ -163,12 +176,13 @@ class TokenizerConnectorImplTest {
         // given
         String pii = "pii";
         String namespace = "selfcare";
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), namespace);
-        // then
-        assertTrue(found.isPresent());
-        assertEquals(pii, found.get());
+        tokenizerConnector.save(pii, namespace)
+                .doOnSuccess(tokenDto ->
+                        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getToken(), namespace))
+                                .expectNext(pii)
+                                .verifyComplete())
+                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
     }
 
     @Test
@@ -177,11 +191,13 @@ class TokenizerConnectorImplTest {
         String pii = "pii";
         String namespace = "selfcare";
         String notAllowedNamespace = "idpay";
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace);
         // then
-        assertFalse(found.isPresent());
+        tokenizerConnector.save(pii, namespace)
+                .doOnSuccess(tokenDto ->
+                        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace))
+                                .verifyComplete())
+                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
     }
 
 }
