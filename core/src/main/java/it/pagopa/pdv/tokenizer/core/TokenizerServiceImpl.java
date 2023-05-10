@@ -7,6 +7,7 @@ import it.pagopa.pdv.tokenizer.core.logging.LogUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -22,43 +23,46 @@ class TokenizerServiceImpl implements TokenizerService {
 
 
     @Override
-    public TokenDto save(String pii, String namespace) {
+    public Mono<TokenDto> save(String pii, String namespace) {
         log.trace("[save] start");
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "[save] inputs: pii = {}, namespace = {}", pii, namespace);
         Assert.hasText(pii, "A Private Data is required");
         Assert.hasText(namespace, "A Namespace is required");
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
-        log.debug("[save] output = {}", tokenDto);
-        log.trace("[save] end");
-        return tokenDto;
+        return tokenizerConnector.save(pii, namespace)
+                .doOnSuccess(tokenDto -> {
+                    log.debug("[save] output = {}", tokenDto);
+                    log.trace("[save] end");
+                });
     }
 
 
     @Override
-    public TokenDto findById(String pii, String namespace) {
+    public Mono<TokenDto> findById(String pii, String namespace) {
         log.trace("[findById] start");
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "[findById] inputs: pii = {}, namespace = {}", pii, namespace);
         Assert.hasText(pii, "A Private Data is required");
         Assert.hasText(namespace, "A Namespace is required");
-        TokenDto tokenDto = tokenizerConnector.findById(pii, namespace)
-                .orElseThrow(ResourceNotFoundException::new);
-        log.debug("[findById] output = {}", tokenDto);
-        log.trace("[findById] end");
-        return tokenDto;
+        return tokenizerConnector.findById(pii, namespace)
+                .switchIfEmpty(Mono.error(ResourceNotFoundException::new))
+                .doOnSuccess(tokenDto -> {
+                    log.debug("[findById] output = {}", tokenDto);
+                    log.trace("[findById] end");
+                });
     }
 
 
     @Override
-    public String findPiiByToken(String token, String namespace) {
+    public Mono<String> findPiiByToken(String token, String namespace) {
         log.trace("[findPiiByToken] start");
         log.debug("[findPiiByToken] inputs: token = {}, namespace = {}", token, namespace);
         Assert.hasText(token, "A token is required");
         Assert.hasText(namespace, "A namespace is required");
-        String pii = tokenizerConnector.findPiiByToken(token, namespace)
-                .orElseThrow(ResourceNotFoundException::new);
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "[findPiiByToken] output = {}", pii);
-        log.trace("[findPiiByToken] end");
-        return pii;
+        return tokenizerConnector.findPiiByToken(token, namespace)
+                .switchIfEmpty(Mono.error(ResourceNotFoundException::new))
+                .doOnSuccess(pii -> {
+                    log.debug(LogUtils.CONFIDENTIAL_MARKER, "[findPiiByToken] output = {}", pii);
+                    log.trace("[findPiiByToken] end");
+                });
     }
 
 }
