@@ -33,7 +33,7 @@ public class TokenizerControllerResponseValidator {
         log.trace("[validateResponse] start");
         log.debug("[validateResponse] inputs: result = {}", result);
         if (result != null) {
-            if (Collection.class.isAssignableFrom(result.getClass())) {
+            if (Collection.class.isAssignableFrom(result.getClass())) {//FIXME: currently result is either a Mono or a Flux object
                 ((Collection<?>) result).forEach(this::validate);
             } else {
                 validate(result);
