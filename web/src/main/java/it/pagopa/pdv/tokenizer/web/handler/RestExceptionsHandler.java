@@ -7,15 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.server.ServerWebExchange;
 
-import javax.servlet.ServletException;
 import javax.validation.ValidationException;
 import java.util.stream.Collectors;
 
@@ -34,43 +32,50 @@ public class RestExceptionsHandler {
 
 
     @ExceptionHandler({Exception.class})
-    ResponseEntity<Problem> handleThrowable(Throwable e) {
+    ResponseEntity<Problem> handleThrowable(Throwable e, ServerWebExchange exchange) {
         log.error(UNHANDLED_EXCEPTION, e);
-        return ProblemMapper.toResponseEntity(new Problem(INTERNAL_SERVER_ERROR, e.getMessage()));
+        Problem problem = new Problem(INTERNAL_SERVER_ERROR, e.getMessage());
+        problem.setInstance(exchange.getRequest().getURI().getPath());
+        return ProblemMapper.toResponseEntity(problem);
     }
 
+    //FIXME: ServletException is no more a dependency
 
-    @ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
-    ResponseEntity<Problem> handleHttpMediaTypeNotAcceptableException(HttpMediaTypeNotAcceptableException e) {
-        log.warn(e.toString());
-        return ProblemMapper.toResponseEntity(new Problem(NOT_ACCEPTABLE, e.getMessage()));
-    }
+//    @ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
+//    ResponseEntity<Problem> handleHttpMediaTypeNotAcceptableException(Exception e) {
+//        log.warn(e.toString());
+//        return ProblemMapper.toResponseEntity(new Problem(NOT_ACCEPTABLE, e.getMessage()));
+//    }
 
 
-    @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
-    ResponseEntity<Problem> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
-        log.warn(e.toString());
-        return ProblemMapper.toResponseEntity(new Problem(METHOD_NOT_ALLOWED, e.getMessage()));
-    }
+    //FIXME: ServletException is no more a dependency
+
+//    @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
+//    ResponseEntity<Problem> handleHttpRequestMethodNotSupportedException(Exception e) {
+//        log.warn(e.toString());
+//        return ProblemMapper.toResponseEntity(new Problem(METHOD_NOT_ALLOWED, e.getMessage()));
+//    }
 
 
     @ExceptionHandler({
             ValidationException.class,
             BindException.class,
-            ServletException.class,
             MethodArgumentTypeMismatchException.class,
             MaxUploadSizeExceededException.class,
             HttpMessageNotReadableException.class
     })
-    ResponseEntity<Problem> handleBadRequestException(Exception e) {
+    ResponseEntity<Problem> handleBadRequestException(Exception e, ServerWebExchange exchange) {
         log.warn(e.toString());
-        return ProblemMapper.toResponseEntity(new Problem(BAD_REQUEST, e.getMessage()));
+        Problem problem = new Problem(BAD_REQUEST, e.getMessage());
+        problem.setInstance(exchange.getRequest().getURI().getPath());
+        return ProblemMapper.toResponseEntity(problem);
     }
 
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
-    ResponseEntity<Problem> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    ResponseEntity<Problem> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, ServerWebExchange exchange) {
         final Problem problem = new Problem(BAD_REQUEST, "Validation failed");
+        problem.setInstance(exchange.getRequest().getURI().getPath());
         problem.setInvalidParams(e.getFieldErrors().stream()
                 .map(fieldError -> new Problem.InvalidParam(fieldError.getObjectName() + "." + fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.toList()));
@@ -80,9 +85,11 @@ public class RestExceptionsHandler {
 
 
     @ExceptionHandler({ResourceNotFoundException.class})
-    ResponseEntity<Problem> handleResourceNotFoundException(ResourceNotFoundException e) {
+    ResponseEntity<Problem> handleResourceNotFoundException(ResourceNotFoundException e, ServerWebExchange exchange) {
         log.warn(e.toString());
-        return ProblemMapper.toResponseEntity(new Problem(NOT_FOUND, e.getMessage()));
+        Problem problem = new Problem(NOT_FOUND, e.getMessage());
+        problem.setInstance(exchange.getRequest().getURI().getPath());
+        return ProblemMapper.toResponseEntity(problem);
     }
 
 }
