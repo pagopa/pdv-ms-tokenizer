@@ -4,10 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
+import org.springframework.mock.web.server.MockServerWebExchange;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(OutputCaptureExtension.class)
@@ -17,32 +19,34 @@ class LogRequestInterceptorTest {
 
     private final LogRequestInterceptor logRequestInterceptorUnderTest = new LogRequestInterceptor();
 
+    private WebFilterChain webFilterChainMock = exchange -> Mono.empty();
+
 
     @Test
-    void preHandle_skipLog(CapturedOutput output) {
+    void filter_notSkipLog(CapturedOutput output) {
         // given
-        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
-        MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
-        String expectedSuffix = String.format(MESSAGE_TEMPLATE, mockHttpServletRequest.getMethod(), mockHttpServletRequest.getRequestURI());
+        String URL_PATH = "test/foo";
+        MockServerHttpRequest mockServerHttpRequest = MockServerHttpRequest.get(URL_PATH).build();
+        MockServerWebExchange mockServerWebExchange = MockServerWebExchange.from(mockServerHttpRequest);
+        String expectedSuffix = String.format(MESSAGE_TEMPLATE, mockServerHttpRequest.getMethod(), mockServerHttpRequest.getURI().getPath());
         // when
-        boolean result = logRequestInterceptorUnderTest.preHandle(mockHttpServletRequest, mockHttpServletResponse, "controller");
+        logRequestInterceptorUnderTest.filter(mockServerWebExchange, webFilterChainMock);
         // then
-        assertTrue(result);
         assertTrue(output.getOut().endsWith(expectedSuffix));
     }
 
 
     @Test
-    void preHandle_notSkipLog(CapturedOutput output) {
+    void filter_skipLog(CapturedOutput output) {
         // given
-        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
-        mockHttpServletRequest.setRequestURI("/swagger-resources");
-        MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
+        String URL_PATH = "/swagger-resources";
+        MockServerHttpRequest mockServerHttpRequest = MockServerHttpRequest.get(URL_PATH).build();
+        MockServerWebExchange mockServerWebExchange = MockServerWebExchange.from(mockServerHttpRequest);
+        String expectedSuffix = String.format(MESSAGE_TEMPLATE, mockServerHttpRequest.getMethod(), mockServerHttpRequest.getURI().getPath());
         // when
-        boolean result = logRequestInterceptorUnderTest.preHandle(mockHttpServletRequest, mockHttpServletResponse, "controller");
+        logRequestInterceptorUnderTest.filter(mockServerWebExchange, webFilterChainMock);
         // then
-        assertTrue(result);
-        assertEquals(0, output.length());
+        assertFalse(output.getOut().endsWith(expectedSuffix));
     }
 
 }
