@@ -113,14 +113,16 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                 hashKeyValue,
                 rangeKeyName,
                 rangeKeyValue);
-        table.updateItem(new UpdateItemSpec()
-                .withPrimaryKey(primaryKey)
-                .withExpressionSpec(new ExpressionSpecBuilder()
-                        .addUpdate(S(statusFieldName).set(Status.ACTIVE.toString()))
-                        .withCondition(attribute_exists(hashKeyName)
-                                .and(attribute_exists(rangeKeyName))
-                                .and(S(statusFieldName).eq(Status.PENDING_DELETE.toString())))
-                        .buildForUpdate()));
+            table.updateItem(new UpdateItemSpec()
+                    .withPrimaryKey(primaryKey)
+                    .withExpressionSpec(new ExpressionSpecBuilder()
+                            .addUpdate(S(statusFieldName).set(Status.ACTIVE.toString()))
+                            .withCondition(attribute_exists(hashKeyName)
+                                    .and(attribute_exists(rangeKeyName))
+                                    .and(S(statusFieldName).eq(Status.PENDING_DELETE.toString())))
+                            .buildForUpdate()));
+
+
     }
 
 
@@ -130,7 +132,8 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         log.debug(CONFIDENTIAL_MARKER, "[findById] inputs: pii = {}, namespace = {}", pii, namespace);
         Assert.hasText(pii, "A Private Data is required");
         Assert.hasText(namespace, "A Namespace is required");
-        Optional<TokenDto> result = Optional.ofNullable(namespacedFiscalCodeTableMapper.load(pii, namespace))
+        Optional<TokenDto> result;
+        result = Optional.ofNullable(namespacedFiscalCodeTableMapper.load(pii, namespace))
                 .filter(p -> Status.ACTIVE.equals(p.getStatus()))
                 .map(namespacedFiscalCodeToken -> {
                     TokenDto tokenDto = new TokenDto();
@@ -138,6 +141,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                     tokenDto.setRootToken(namespacedFiscalCodeToken.getGlobalToken());
                     return tokenDto;
                 });
+
         log.debug("[findById] output = {}", result);
         log.trace("[findById] end");
         return result;
@@ -159,14 +163,15 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
                                 .and(S(namespacedFiscalCodeTableMapper.rangeKey().name()).eq(namespace)))
                         .addProjection(namespacedFiscalCodeTableMapper.hashKey().name())
                         .buildForQuery())
-        );
-        Iterator<Page<Item, QueryOutcome>> iterator = itemCollection.pages().iterator();
-        if (iterator.hasNext()) {
-            Page<Item, QueryOutcome> page = iterator.next();
-            if (page.getLowLevelResult().getItems().size() == 1) {
-                pii = Optional.ofNullable(page.getLowLevelResult().getItems().get(0).getString(namespacedFiscalCodeTableMapper.hashKey().name()));
+            );
+            Iterator<Page<Item, QueryOutcome>> iterator = itemCollection.pages().iterator();
+            if (iterator.hasNext()) {
+                Page<Item, QueryOutcome> page = iterator.next();
+                if (page.getLowLevelResult().getItems().size() == 1) {
+                    pii = Optional.ofNullable(page.getLowLevelResult().getItems().get(0).getString(namespacedFiscalCodeTableMapper.hashKey().name()));
+                }
             }
-        }
+
         log.debug(CONFIDENTIAL_MARKER, "[findPiiByToken] output = {}", pii);
         log.trace("[findPiiByToken] end");
         return pii;

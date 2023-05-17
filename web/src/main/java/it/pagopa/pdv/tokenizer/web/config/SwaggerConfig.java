@@ -62,6 +62,17 @@ class SwaggerConfig {
                                                             .name(Problem.class.getSimpleName()))))))
             .build();
 
+    private static final Response TOO_MANY_REQUESTS_RESPONSE = new ResponseBuilder()
+            .code(String.valueOf(HttpStatus.TOO_MANY_REQUESTS.value()))
+            .description(HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase())
+            .representation(MediaType.APPLICATION_PROBLEM_JSON).apply(repBuilder ->
+                    repBuilder.model(modelSpecBuilder ->
+                            modelSpecBuilder.referenceModel(refModelSpecBuilder ->
+                                    refModelSpecBuilder.key(modelKeyBuilder ->
+                                            modelKeyBuilder.qualifiedModelName(qualifiedModelNameBuilder ->
+                                                    qualifiedModelNameBuilder.namespace(Problem.class.getPackageName()).name(Problem.class.getSimpleName()))))))
+            .build();
+
     @Configuration
     @Profile("swaggerIT")
     @PropertySource("classpath:/swagger/swagger_it.properties")
@@ -97,11 +108,11 @@ class SwaggerConfig {
                 .tags(new Tag("token", environment.getProperty("swagger.tag.token.description")))
                 .directModelSubstitute(LocalTime.class, String.class)
                 .useDefaultResponseMessages(false)
-                .globalResponses(HttpMethod.GET, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE))
-                .globalResponses(HttpMethod.DELETE, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE))
-                .globalResponses(HttpMethod.POST, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE))
-                .globalResponses(HttpMethod.PUT, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE))
-                .globalResponses(HttpMethod.PATCH, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE))
+                .globalResponses(HttpMethod.GET, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE, TOO_MANY_REQUESTS_RESPONSE))
+                .globalResponses(HttpMethod.DELETE, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE, TOO_MANY_REQUESTS_RESPONSE))
+                .globalResponses(HttpMethod.POST, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE, TOO_MANY_REQUESTS_RESPONSE))
+                .globalResponses(HttpMethod.PUT, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE, TOO_MANY_REQUESTS_RESPONSE))
+                .globalResponses(HttpMethod.PATCH, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE, TOO_MANY_REQUESTS_RESPONSE))
                 .additionalModels(typeResolver.resolve(Problem.class))
                 .forCodeGeneration(true);
     }
