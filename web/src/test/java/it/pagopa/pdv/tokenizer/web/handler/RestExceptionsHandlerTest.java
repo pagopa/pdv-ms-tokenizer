@@ -15,6 +15,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.NotAcceptableStatusException;
 
 import javax.validation.ValidationException;
 import java.util.List;
@@ -82,41 +84,39 @@ class RestExceptionsHandlerTest {
     }
 
 
-//FIXME: ServletException is no more a dependency
 
-//    @Test
-//    void handleHttpMediaTypeNotAcceptableException() {
-//        // given
-//        HttpMediaTypeNotAcceptableException exceptionMock = Mockito.mock(HttpMediaTypeNotAcceptableException.class);
-//        Mockito.when(exceptionMock.getMessage())
-//                .thenReturn(DETAIL_MESSAGE);
-//        // when
-//        ResponseEntity<Problem> responseEntity = handler.handleHttpMediaTypeNotAcceptableException(exceptionMock);
-//        // then
-//        assertNotNull(responseEntity);
-//        assertEquals(NOT_ACCEPTABLE, responseEntity.getStatusCode());
-//        assertNotNull(responseEntity.getBody());
-//        assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
-//        assertEquals(NOT_ACCEPTABLE.value(), responseEntity.getBody().getStatus());
-//    }
+    @Test
+    void handleHttpMediaTypeNotAcceptableException() {
+        // given
+        NotAcceptableStatusException exceptionMock = Mockito.mock(NotAcceptableStatusException.class);
+        Mockito.when(exceptionMock.getMessage())
+                .thenReturn(DETAIL_MESSAGE);
+        // when
+        ResponseEntity<Problem> responseEntity = handler.handleNotAcceptableStatusException(exceptionMock);
+        // then
+        assertNotNull(responseEntity);
+        assertEquals(NOT_ACCEPTABLE, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
+        assertEquals(NOT_ACCEPTABLE.value(), responseEntity.getBody().getStatus());
+    }
 
-//FIXME: ServletException is no more a dependency
 
-//    @Test
-//    void handleHttpRequestMethodNotSupportedException() {
-//        // given
-//        HttpRequestMethodNotSupportedException exceptionMock = Mockito.mock(HttpRequestMethodNotSupportedException.class);
-//        Mockito.when(exceptionMock.getMessage())
-//                .thenReturn(DETAIL_MESSAGE);
-//        // when
-//        ResponseEntity<Problem> responseEntity = handler.handleHttpRequestMethodNotSupportedException(exceptionMock);
-//        // then
-//        assertNotNull(responseEntity);
-//        assertEquals(METHOD_NOT_ALLOWED, responseEntity.getStatusCode());
-//        assertNotNull(responseEntity.getBody());
-//        assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
-//        assertEquals(METHOD_NOT_ALLOWED.value(), responseEntity.getBody().getStatus());
-//    }
+    @Test
+    void handleHttpRequestMethodNotSupportedException() {
+        // given
+        MethodNotAllowedException exceptionMock = Mockito.mock(MethodNotAllowedException.class);
+        Mockito.when(exceptionMock.getMessage())
+                .thenReturn(DETAIL_MESSAGE);
+        // when
+        ResponseEntity<Problem> responseEntity = handler.handleMethodNotAllowedException(exceptionMock);
+        // then
+        assertNotNull(responseEntity);
+        assertEquals(METHOD_NOT_ALLOWED, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
+        assertEquals(METHOD_NOT_ALLOWED.value(), responseEntity.getBody().getStatus());
+    }
 
 
     @Test
