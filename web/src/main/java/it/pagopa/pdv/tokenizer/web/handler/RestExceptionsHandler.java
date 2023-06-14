@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 import javax.validation.ValidationException;
@@ -40,22 +42,19 @@ public class RestExceptionsHandler {
         return ProblemMapper.toResponseEntity(problem);
     }
 
-    //FIXME: ServletException is no more a dependency
-
-//    @ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
-//    ResponseEntity<Problem> handleHttpMediaTypeNotAcceptableException(Exception e) {
-//        log.warn(e.toString());
-//        return ProblemMapper.toResponseEntity(new Problem(NOT_ACCEPTABLE, e.getMessage()));
-//    }
+      @ExceptionHandler({NotAcceptableStatusException.class})
+      ResponseEntity<Problem> handleNotAcceptableStatusException(Exception e) {
+            log.warn(e.toString());
+            return ProblemMapper.toResponseEntity(new Problem(NOT_ACCEPTABLE, e.getMessage()));
+        }
 
 
-    //FIXME: ServletException is no more a dependency
 
-//    @ExceptionHandler({HttpRequestMethodNotSupportedException.class})
-//    ResponseEntity<Problem> handleHttpRequestMethodNotSupportedException(Exception e) {
-//        log.warn(e.toString());
-//        return ProblemMapper.toResponseEntity(new Problem(METHOD_NOT_ALLOWED, e.getMessage()));
-//    }
+      @ExceptionHandler({MethodNotAllowedException.class})
+      ResponseEntity<Problem> handleMethodNotAllowedException(Exception e) {
+          log.warn(e.toString());
+          return ProblemMapper.toResponseEntity(new Problem(METHOD_NOT_ALLOWED, e.getMessage()));
+      }
 
 
     @ExceptionHandler({
