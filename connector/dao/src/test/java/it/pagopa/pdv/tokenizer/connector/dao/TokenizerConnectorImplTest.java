@@ -69,20 +69,18 @@ class TokenizerConnectorImplTest {
         String pii = "savePii";
         String namespace = "saveSelfcare";
         // when
-        tokenizerConnector.save(pii, namespace)
-                .doOnSuccess(savedNewTokenDto ->
-                        StepVerifier.create(tokenizerConnector.save(pii, namespace)
-                                        .doOnNext(__ -> tokenizerConnector.save(pii, namespace)))
-                                .assertNext(savedExistingTokenDto -> {
-                                    // then
-                                    assertNotNull(savedNewTokenDto);
-                                    assertNotNull(savedNewTokenDto.getRootToken());
-                                    assertNotNull(savedNewTokenDto.getToken());
-                                    assertEquals(savedNewTokenDto.getRootToken(), savedExistingTokenDto.getRootToken());
-                                    assertEquals(savedNewTokenDto.getToken(), savedExistingTokenDto.getToken());
-                                })
-                                .verifyComplete())
-                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
+        // saves pii and namespace. We call block API because we want to set a precondition
+        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
+        TokenDto savedNewTokenDto = tokenizerConnector.save(pii, namespace).block();
+        // then
+        StepVerifier.create(tokenizerConnector.save(pii, namespace)).assertNext(savedExistingTokenDto -> {
+            assertNotNull(savedNewTokenDto);
+            assertNotNull(savedNewTokenDto.getRootToken());
+            assertNotNull(savedNewTokenDto.getToken());
+            assertEquals(savedNewTokenDto.getRootToken(), savedExistingTokenDto.getRootToken());
+            assertEquals(savedNewTokenDto.getToken(), savedExistingTokenDto.getToken());
+        })
+                .verifyComplete();
     }
 
     @Test
@@ -130,18 +128,18 @@ class TokenizerConnectorImplTest {
         String pii = "savedPii";
         String namespace = "savedSelfcare";
         // when
-        tokenizerConnector.save(pii, namespace)
-                .doOnSuccess(tokenDto ->
-                        StepVerifier.create(tokenizerConnector.findById(pii, namespace))
-                                .assertNext(found -> {
-                                    // then
-                                    assertNotNull(found);
-                                    assertEquals(tokenDto.getRootToken(), found.getRootToken());
-                                    assertEquals(tokenDto.getToken(), found.getToken());
-                                })
-                                .verifyComplete())
-                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
-    }
+        // saves pii and namespace. We call block API because we want to set a precondition
+        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace).block();
+        // then
+        StepVerifier.create(tokenizerConnector.findById(pii, namespace))
+                .assertNext(found -> {
+                    assertNotNull(found);
+                    assertEquals(tokenDto.getRootToken(), found.getRootToken());
+                    assertEquals(tokenDto.getToken(), found.getToken());
+                })
+                .verifyComplete();
+}
 
     @Test
     void findPiiByToken_nullToken() {
@@ -162,12 +160,13 @@ class TokenizerConnectorImplTest {
         String pii = "pii";
         String namespace = "selfcare";
         // when
-        tokenizerConnector.save(pii, namespace)
-                .doOnSuccess(tokenDto ->
-                        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), GlobalFiscalCodeToken.NAMESPACE))
-                                .expectNext(pii)
-                                .verifyComplete())
-                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
+        // saves pii and namespace. We call block API because we want to set a precondition
+        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace).block();
+        //then
+        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), GlobalFiscalCodeToken.NAMESPACE))
+                .expectNext(pii)
+                .verifyComplete();
     }
 
 
@@ -177,12 +176,13 @@ class TokenizerConnectorImplTest {
         String pii = "pii";
         String namespace = "selfcare";
         // when
-        tokenizerConnector.save(pii, namespace)
-                .doOnSuccess(tokenDto ->
-                        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getToken(), namespace))
-                                .expectNext(pii)
-                                .verifyComplete())
-                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
+        // saves pii and namespace. We call block API because we want to set a precondition
+        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace).block();
+        // then
+        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getToken(), namespace))
+                .expectNext(pii)
+                .verifyComplete();
     }
 
     @Test
@@ -192,12 +192,13 @@ class TokenizerConnectorImplTest {
         String namespace = "selfcare";
         String notAllowedNamespace = "idpay";
         // when
+        // saves pii and namespace. We call block API because we want to set a precondition
+        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace).block();
+
         // then
-        tokenizerConnector.save(pii, namespace)
-                .doOnSuccess(tokenDto ->
-                        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace))
-                                .verifyComplete())
-                .block();// FIXME: is the correct way to use a Publisher as an precondition for the test?
+        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace))
+                .verifyComplete();
     }
 
 }
