@@ -88,7 +88,7 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         namespacedFiscalCodeToken.setNamespace(namespace);
         namespacedFiscalCodeToken.setGlobalToken(rootToken);
         try {
-            namespacedFiscalCodeTableMapper.saveIfNotExists(namespacedFiscalCodeToken);//TODO: good for performance??
+            namespacedFiscalCodeTableMapper.saveIfNotExists(namespacedFiscalCodeToken);//TODO: good for performance???
             token = namespacedFiscalCodeToken.getToken();
         } catch (ConditionalCheckFailedException e) {
             NamespacedFiscalCodeToken namespacedTokenFound =
