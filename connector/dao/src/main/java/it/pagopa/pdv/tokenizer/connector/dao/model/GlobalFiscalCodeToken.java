@@ -19,7 +19,7 @@ public class GlobalFiscalCodeToken {
 
     private String pii;
     @FieldNameConstants.Include
-    private String token = UUID.randomUUID().toString();// it should be good in the new enhanced async client
+    private String token;
     @FieldNameConstants.Include
     private Status status = ACTIVE;
 
@@ -44,6 +44,10 @@ public class GlobalFiscalCodeToken {
     @DynamoDbUpdateBehavior(UpdateBehavior.WRITE_IF_NOT_EXISTS)
     public String getToken() {
         return token;
+    }
+
+    public GlobalFiscalCodeToken(){
+        token = UUID.randomUUID().toString();
     }
 
 }
