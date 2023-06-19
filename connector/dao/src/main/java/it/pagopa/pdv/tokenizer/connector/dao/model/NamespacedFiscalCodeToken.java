@@ -17,7 +17,7 @@ public class NamespacedFiscalCodeToken {
     private String pii;
     private String namespace;
     @FieldNameConstants.Include
-    private String token = UUID.randomUUID().toString();// it should be good in the new enhanced async client
+    private String token;
     @FieldNameConstants.Include
     private String globalToken;
     @FieldNameConstants.Include
@@ -40,6 +40,10 @@ public class NamespacedFiscalCodeToken {
     @DynamoDbUpdateBehavior(UpdateBehavior.WRITE_IF_NOT_EXISTS)
     public String getToken() {
         return token;
+    }
+
+    public NamespacedFiscalCodeToken() {
+        token = UUID.randomUUID().toString();
     }
 
 }
