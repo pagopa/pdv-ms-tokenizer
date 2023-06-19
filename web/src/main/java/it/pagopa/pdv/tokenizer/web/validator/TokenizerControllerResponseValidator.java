@@ -32,6 +32,8 @@ public class TokenizerControllerResponseValidator {
     @Around("controllersPointcut()")
     public Mono<Object> validateResponse(ProceedingJoinPoint joinPoint) throws Throwable{
         log.trace("[validateResponse] start");
+        // In the Tokenizer microservice, only a Mono<Object> can be returned by Controller methods
+        // so in this case we can map the result directly to the Mono publisher.
         Mono<Object> result = (Mono<Object>) joinPoint.proceed();
         return result.map(returnValue -> {
             validate(returnValue);

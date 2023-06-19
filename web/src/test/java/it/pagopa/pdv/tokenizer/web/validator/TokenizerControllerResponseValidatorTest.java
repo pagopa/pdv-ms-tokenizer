@@ -77,11 +77,11 @@ class TokenizerControllerResponseValidatorTest {
         // In this case I create a new instance of TokjenizerControllerResponseValidator because I want to test it
         // outside AOP context
         TokenizerControllerResponseValidator mockValidator = new TokenizerControllerResponseValidator(validator);
-        // Create a not valid Mono
-        Mono<Object> notValidMono = controller.notVoidMethodValidMonoResult();
+        // Create a valid Mono
+        Mono<Object> validMono = controller.notVoidMethodValidMonoResult();
 
         // Mock the behavior of the join point to return a notValidMono when called
-        Mockito.when(joinPoint.proceed()).thenReturn(notValidMono);
+        Mockito.when(joinPoint.proceed()).thenReturn(validMono);
 
         // Call the advice method
         Mono<Object> result = mockValidator.validateResponse(joinPoint);
@@ -95,11 +95,11 @@ class TokenizerControllerResponseValidatorTest {
         ProceedingJoinPoint joinPoint = Mockito.mock(ProceedingJoinPoint.class);
 
         TokenizerControllerResponseValidator mockValidator = new TokenizerControllerResponseValidator(validator);
-        // Create a not valid Mono
-        Mono<Void> notValidMono = controller.voidMethodMono();
+        // Create a void Mono
+        Mono<Void> voidMono = controller.voidMethodMono();
 
         // Mock the behavior of the join point to return a notValidMono when called
-        Mockito.when(joinPoint.proceed()).thenReturn(notValidMono);
+        Mockito.when(joinPoint.proceed()).thenReturn(voidMono);
 
         // Call the advice method
         Mono<Object> result = mockValidator.validateResponse(joinPoint);
