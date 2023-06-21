@@ -1,5 +1,6 @@
 package it.pagopa.pdv.tokenizer.web.handler;
 
+import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestsException;
 import it.pagopa.pdv.tokenizer.core.exception.ResourceNotFoundException;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
 import it.pagopa.pdv.tokenizer.web.model.mapper.ProblemMapper;
@@ -89,6 +90,12 @@ public class RestExceptionsHandler {
         Problem problem = new Problem(NOT_FOUND, e.getMessage());
         problem.setInstance(exchange.getRequest().getURI().getPath());
         return ProblemMapper.toResponseEntity(problem);
+    }
+
+    @ExceptionHandler({TooManyRequestsException.class})
+    ResponseEntity<Problem> handleTooManyRequestException(TooManyRequestsException e) {
+        log.warn(e.toString());
+        return ProblemMapper.toResponseEntity(new Problem(TOO_MANY_REQUESTS, e.getMessage()));
     }
 
 }
