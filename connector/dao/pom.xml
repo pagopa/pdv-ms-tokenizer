@@ -12,8 +12,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-dynamodb</artifactId>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb-enhanced</artifactId>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
@@ -25,6 +25,10 @@
             <artifactId>libsqlite4java-osx-aarch64</artifactId>
             <scope>test</scope>
             <type>dylib</type>
+        </dependency>
+        <dependency>
+            <groupId>io.reactivex.rxjava3</groupId>
+            <artifactId>rxjava</artifactId>
         </dependency>
     </dependencies>
 

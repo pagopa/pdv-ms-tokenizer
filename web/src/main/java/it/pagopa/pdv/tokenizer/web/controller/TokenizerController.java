@@ -6,15 +6,17 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.TokenizerService;
 import it.pagopa.pdv.tokenizer.web.model.PiiResource;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
 import it.pagopa.pdv.tokenizer.web.model.TokenResource;
+import it.pagopa.pdv.tokenizer.web.model.mapper.PiiResourceMapper;
+import it.pagopa.pdv.tokenizer.web.model.mapper.TokenResourceMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.UUID;
@@ -42,21 +44,20 @@ public class TokenizerController {
     @ApiOperation(value = "${swagger.api.tokens.save.summary}",
             notes = "${swagger.api.tokens.save.notes}")
     @PutMapping(value = "")
-    public TokenResource save(@ApiParam("${swagger.model.namespace}")
-                              @RequestHeader(NAMESPACE_HEADER_NAME)
-                                      String namespace,
-                              @RequestBody
-                              @Valid
-                                      PiiResource request) {
+    public Mono<TokenResource> save(@ApiParam("${swagger.model.namespace}")
+                                    @RequestHeader(NAMESPACE_HEADER_NAME)
+                                    String namespace,
+                                    @RequestBody
+                                    @Valid
+                                    PiiResource request) {
         log.trace("[save] start");
         log.debug(CONFIDENTIAL_MARKER, "[save] inputs: namespace = {}, request = {}", namespace, request);
-        TokenDto tokenDto = tokenizerService.save(request.getPii(), namespace);
-        TokenResource tokenResource = new TokenResource();
-        tokenResource.setToken(UUID.fromString(tokenDto.getToken()));
-        tokenResource.setRootToken(UUID.fromString(tokenDto.getRootToken()));
-        log.debug("[save] output = {}", tokenResource);
-        log.trace("[save] end");
-        return tokenResource;
+        return tokenizerService.save(request.getPii(), namespace)
+                .map(TokenResourceMapper::from)
+                .doOnSuccess(tokenResource -> {
+                    log.debug("[save] output = {}", tokenResource);
+                    log.trace("[save] end");
+                });
     }
 
 
@@ -69,40 +70,39 @@ public class TokenizerController {
                             schema = @Schema(implementation = Problem.class))
             })
     @PostMapping(value = "search")
-    public TokenResource search(@ApiParam("${swagger.model.namespace}")
-                                @RequestHeader(NAMESPACE_HEADER_NAME)
-                                        String namespace,
-                                @RequestBody
-                                @Valid
-                                        PiiResource request) {
+    public Mono<TokenResource> search(@ApiParam("${swagger.model.namespace}")
+                                      @RequestHeader(NAMESPACE_HEADER_NAME)
+                                      String namespace,
+                                      @RequestBody
+                                      @Valid
+                                      PiiResource request) {
         log.trace("[search] start");
         log.debug(CONFIDENTIAL_MARKER, "[search] inputs: namespace = {}, request = {}", namespace, request);
-        TokenDto tokenDto = tokenizerService.findById(request.getPii(), namespace);
-        TokenResource tokenResource = new TokenResource();
-        tokenResource.setToken(UUID.fromString(tokenDto.getToken()));
-        tokenResource.setRootToken(UUID.fromString(tokenDto.getRootToken()));
-        log.debug("[search] output = {}", tokenResource);
-        log.trace("[search] end");
-        return tokenResource;
+        return tokenizerService.findById(request.getPii(), namespace)
+                .map(TokenResourceMapper::from)
+                .doOnSuccess(tokenResource -> {
+                    log.debug("[search] output = {}", tokenResource);
+                    log.trace("[search] end");
+                });
     }
 
 
     @ApiOperation(value = "${swagger.api.tokens.findPii.summary}",
             notes = "${swagger.api.tokens.findPii.notes}")
     @GetMapping(value = "{token}/pii")
-    public PiiResource findPii(@ApiParam("${swagger.model.token}")
-                               @PathVariable UUID token,
-                               @ApiParam("${swagger.model.namespace}")
-                               @RequestHeader(NAMESPACE_HEADER_NAME)
-                               String namespace) {
+    public Mono<PiiResource> findPii(@ApiParam("${swagger.model.token}")
+                                     @PathVariable UUID token,
+                                     @ApiParam("${swagger.model.namespace}")
+                                     @RequestHeader(NAMESPACE_HEADER_NAME)
+                                     String namespace) {
         log.trace("[findPii] start");
         log.debug("[findPii] inputs: token = {}", token);
-        String pii = tokenizerService.findPiiByToken(token.toString(), namespace);
-        PiiResource piiResource = new PiiResource();
-        piiResource.setPii(pii);
-        log.debug(CONFIDENTIAL_MARKER, "[findPii] output = {}", piiResource);
-        log.trace("[findPii] end");
-        return piiResource;
+        return tokenizerService.findPiiByToken(token.toString(), namespace)
+                .map(PiiResourceMapper::from)
+                .doOnSuccess(piiResource -> {
+                    log.debug(CONFIDENTIAL_MARKER, "[findPii] output = {}", piiResource);
+                    log.trace("[findPii] end");
+                });
     }
 
 }
