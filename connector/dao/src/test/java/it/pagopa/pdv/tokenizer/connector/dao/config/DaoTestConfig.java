@@ -1,78 +1,67 @@
 package it.pagopa.pdv.tokenizer.connector.dao.config;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
+import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
+import com.amazonaws.services.dynamodbv2.model.ProjectionType;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import it.pagopa.pdv.tokenizer.connector.dao.TokenizerConnectorImpl;
 import it.pagopa.pdv.tokenizer.connector.dao.model.NamespacedFiscalCodeToken;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
-import software.amazon.awssdk.enhanced.dynamodb.*;
-import software.amazon.awssdk.enhanced.dynamodb.internal.operations.CreateTableOperation;
-import software.amazon.awssdk.enhanced.dynamodb.internal.operations.DefaultOperationContext;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.BeanTableSchema;
-import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.EnhancedGlobalSecondaryIndex;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-import software.amazon.awssdk.services.dynamodb.model.CreateTableRequest;
-import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
-import software.amazon.awssdk.services.dynamodb.model.ProjectionType;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Collectors;
 
 @TestConfiguration
 @Import(DynamoDBConfig.class)
 public class DaoTestConfig {
 
-    @SneakyThrows
-    public static void dynamoDBLocalSetup(DynamoDbAsyncClient dynamoDbAsyncClient, DynamoDbEnhancedAsyncClient dbEnhancedAsyncClient) {
-        ListTablesResponse listTablesResponse = dynamoDbAsyncClient.listTables().get();
-        if (!listTablesResponse.tableNames().contains(TokenizerConnectorImpl.TABLE_NAME)) {
-            BeanTableSchema<NamespacedFiscalCodeToken> tableSchema = TableSchema.fromBean(NamespacedFiscalCodeToken.class);
-            DynamoDbAsyncTable<NamespacedFiscalCodeToken> table = dbEnhancedAsyncClient.table(TokenizerConnectorImpl.TABLE_NAME, tableSchema);
-            table.createTable(createTableRequest(tableSchema));
+    public static void dynamoDBLocalSetup(AmazonDynamoDB client, DynamoDBMapper dynamoDBMapper) {
+        ListTablesResult tablesResult = client.listTables();
+        if (!tablesResult.getTableNames().contains(TokenizerConnectorImpl.TABLE_NAME)) {
+            CreateTableRequest tableRequest = createCreateTableRequest(dynamoDBMapper);
+            client.createTable(tableRequest);
         }
     }
 
-    @SneakyThrows
-    private static CreateTableEnhancedRequest createTableRequest(BeanTableSchema<NamespacedFiscalCodeToken> tableSchema) {
-        return CreateTableEnhancedRequest.builder()
-                .provisionedThroughput(provisionedThroughputBuilder -> provisionedThroughputBuilder
-                        .readCapacityUnits(5L)
-                        .writeCapacityUnits(5L)
-                        .build())
-                .globalSecondaryIndices(tableSchema.tableMetadata().indices().stream()
-                        .filter(indexMetadata -> indexMetadata.name().startsWith("gsi_"))
-                        .map(indexMetadata -> EnhancedGlobalSecondaryIndex.builder()
-                                .indexName(indexMetadata.name())
-                                .provisionedThroughput(provisionedThroughputBuilder -> provisionedThroughputBuilder
-                                        .readCapacityUnits(5L)
-                                        .writeCapacityUnits(5L)
-                                        .build())
-                                .projection(projBuilder -> projBuilder.projectionType(ProjectionType.ALL))
-                                .build()).collect(Collectors.toList()))
-                .build();
+    private static CreateTableRequest createCreateTableRequest(DynamoDBMapper dynamoDBMapper) {
+        CreateTableRequest tableRequest = dynamoDBMapper.generateCreateTableRequest(NamespacedFiscalCodeToken.class);
+        tableRequest.setProvisionedThroughput(new ProvisionedThroughput(5L, 5L));
+
+        if (tableRequest.getGlobalSecondaryIndexes() != null) {
+            tableRequest.getGlobalSecondaryIndexes().forEach(gsi -> {
+                gsi.setProvisionedThroughput(new ProvisionedThroughput(5L, 5L));
+                gsi.getProjection().setProjectionType(ProjectionType.ALL);
+            });
+        }
+        return tableRequest;
     }
 
     @Test
     void generateCreateTableRequest() throws IOException {
-        BeanTableSchema<NamespacedFiscalCodeToken> tableSchema = TableSchema.fromBean(NamespacedFiscalCodeToken.class);
-        CreateTableEnhancedRequest createTableEnhancedRequest = createTableRequest(tableSchema);
-        CreateTableOperation<NamespacedFiscalCodeToken> operation = CreateTableOperation.create(createTableEnhancedRequest);
-        OperationContext context = DefaultOperationContext.create(TokenizerConnectorImpl.TABLE_NAME, TableMetadata.primaryIndexName());
-        CreateTableRequest createTableRequest = operation.generateRequest(tableSchema, context, null);
+        DynamoDBMapper dynamoDBMapper = new DynamoDBMapper(null);
+        CreateTableRequest tableRequest = createCreateTableRequest(dynamoDBMapper);
         Path basePath = Paths.get("target/test/dynamodb-local-table-template/");
         Files.createDirectories(basePath);
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.UPPER_CAMEL_CASE);
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.UPPER_CAMEL_CASE);
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        Files.write(basePath.resolve("Token.json"), objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(createTableRequest.toBuilder()));
+        String formatted = objectMapper.writeValueAsString(tableRequest);
+        JsonNode jsonNode = objectMapper.readTree(formatted);
+        ((ObjectNode) jsonNode).remove("RequestClientOptions");
+        ((ObjectNode) jsonNode).remove("GeneralProgressListener");
+        ((ObjectNode) jsonNode).remove("ReadLimit");
+        Files.write(basePath.resolve("Token.json"), jsonNode.toPrettyString().getBytes());
     }
 
 }

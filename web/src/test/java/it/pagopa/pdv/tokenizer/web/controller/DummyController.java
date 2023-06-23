@@ -1,21 +1,21 @@
 package it.pagopa.pdv.tokenizer.web.controller;
 
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController
 public class DummyController {
 
-    public Mono<Object> notVoidMethodValidMonoResult() {
-        return Mono.just(new DummyModel("valid"));
+    public Object notVoidMethodValidResult() {
+        return List.of(new DummyModel("valid"));
     }
 
-    public Mono<Object> notVoidMethodInvalidMonoResult() {
-        return Mono.just(new DummyModel());
+    public Object notVoidMethodInvalidResult() {
+        return new DummyModel();
     }
 
-    public Mono<Void> voidMethodMono() {
-        return Mono.empty();
+    public void voidMethod() {
     }
 
 }

@@ -10,17 +10,21 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.UUID;
 
-@WebFluxTest(value = {TokenizerController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
+@WebMvcTest(value = {TokenizerController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
 @ContextConfiguration(classes = {
         TokenizerController.class,
         RestExceptionsHandler.class,
@@ -35,7 +39,7 @@ class TokenizerControllerTest {
     private TokenizerService tokenizerServiceMock;
 
     @Autowired
-    private WebTestClient webTestClient;
+    protected MockMvc mvc;
 
 
     @Test
@@ -46,19 +50,17 @@ class TokenizerControllerTest {
         tokenDto.setToken(UUID.randomUUID().toString());
         tokenDto.setRootToken(UUID.randomUUID().toString());
         Mockito.when(tokenizerServiceMock.save(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(Mono.just(tokenDto));
+                .thenReturn(tokenDto);
         // when
-        webTestClient.put()
-                .uri(BASE_URL + "/")
+        mvc.perform(MockMvcRequestBuilders
+                .put(BASE_URL + "/")
                 .header(NAMESPACE_HEADER_NAME, namespace)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(piiResource.getInputStream().readAllBytes())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.token").isNotEmpty()
-                .jsonPath("$.rootToken").isNotEmpty();
+                .content(piiResource.getInputStream().readAllBytes())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.token", notNullValue()))
+                .andExpect(jsonPath("$.rootToken", notNullValue()));
         // then
         String stubbedPii = JsonPath.parse(piiResource.getInputStream()).read("$.pii", String.class);
         Mockito.verify(tokenizerServiceMock, Mockito.times(1))
@@ -74,19 +76,17 @@ class TokenizerControllerTest {
         tokenDto.setToken(UUID.randomUUID().toString());
         tokenDto.setRootToken(UUID.randomUUID().toString());
         Mockito.when(tokenizerServiceMock.findById(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(Mono.just(tokenDto));
+                .thenReturn(tokenDto);
         // when
-        webTestClient.post()
-                .uri(BASE_URL + "/search")
+        mvc.perform(MockMvcRequestBuilders
+                .post(BASE_URL + "/search")
                 .header(NAMESPACE_HEADER_NAME, namespace)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(piiResource.getInputStream().readAllBytes())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.token").isNotEmpty()
-                .jsonPath("$.rootToken").isNotEmpty();
+                .content(piiResource.getInputStream().readAllBytes())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.token", notNullValue()))
+                .andExpect(jsonPath("$.rootToken", notNullValue()));
         // then
         String stubbedPii = JsonPath.parse(piiResource.getInputStream()).read("$.pii", String.class);
         Mockito.verify(tokenizerServiceMock, Mockito.times(1))
@@ -96,22 +96,21 @@ class TokenizerControllerTest {
 
 
     @Test
-    void findPii() {
+    void findPii() throws Exception {
         // given
         UUID token = UUID.randomUUID();
         String pii = "pii";
         String namespace = "namespace";
         Mockito.when(tokenizerServiceMock.findPiiByToken(Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(Mono.just(pii));
+                .thenReturn(pii);
         // when
-        webTestClient.get()
-                .uri(BASE_URL + "/{token}/pii", token)
-                .header(NAMESPACE_HEADER_NAME, namespace)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.pii").isNotEmpty();
+        mvc.perform(MockMvcRequestBuilders
+                .get(BASE_URL + "/{token}/pii", token)
+                        .header(NAMESPACE_HEADER_NAME, namespace)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.pii", notNullValue()));
         // then
         Mockito.verify(tokenizerServiceMock, Mockito.times(1))
                 .findPiiByToken(token.toString(), namespace);
