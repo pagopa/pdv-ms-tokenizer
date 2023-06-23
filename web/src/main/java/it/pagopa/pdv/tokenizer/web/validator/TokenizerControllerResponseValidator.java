@@ -2,12 +2,13 @@ package it.pagopa.pdv.tokenizer.web.validator;
 
 import it.pagopa.pdv.tokenizer.web.exception.ResponseValidationException;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -28,18 +29,16 @@ public class TokenizerControllerResponseValidator {
     }
 
 
-    @AfterReturning(pointcut = "controllersPointcut()", returning = "result")
-    public void validateResponse(JoinPoint joinPoint, Object result) {
+    @Around("controllersPointcut()")
+    public Mono<Object> validateResponse(ProceedingJoinPoint joinPoint) throws Throwable{
         log.trace("[validateResponse] start");
-        log.debug("[validateResponse] inputs: result = {}", result);
-        if (result != null) {
-            if (Collection.class.isAssignableFrom(result.getClass())) {
-                ((Collection<?>) result).forEach(this::validate);
-            } else {
-                validate(result);
-            }
-        }
-        log.trace("[validateResponse] end");
+        // In the Tokenizer microservice, only a Mono<Object> can be returned by Controller methods
+        // so in this case we can map the result directly to the Mono publisher.
+        Mono<Object> result = (Mono<Object>) joinPoint.proceed();
+        return result.map(returnValue -> {
+            validate(returnValue);
+            return returnValue;
+        });
     }
 
     private void validate(Object result) {
