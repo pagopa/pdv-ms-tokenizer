@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -58,6 +59,9 @@ public class Problem implements Serializable {
         this.title = httpStatus.getReasonPhrase();
         this.status = httpStatus.value();
         final RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes != null && ServletRequestAttributes.class.isAssignableFrom(requestAttributes.getClass())) {
+            this.instance = ((ServletRequestAttributes) requestAttributes).getRequest().getRequestURI();
+        }
     }
 
 

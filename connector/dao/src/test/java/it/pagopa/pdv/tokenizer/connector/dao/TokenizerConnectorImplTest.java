@@ -1,5 +1,7 @@
 package it.pagopa.pdv.tokenizer.connector.dao;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import it.pagopa.pdv.tokenizer.connector.dao.config.DaoTestConfig;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
@@ -11,10 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,14 +27,14 @@ class TokenizerConnectorImplTest {
     private TokenizerConnectorImpl tokenizerConnector;
 
     @SpyBean
-    private DynamoDbAsyncClient dynamoDbAsyncClient;
+    private AmazonDynamoDB amazonDynamoDB;
 
     @SpyBean
-    private DynamoDbEnhancedAsyncClient dbEnhancedAsyncClient;
+    private DynamoDBMapper dynamoDBMapper;
 
     @BeforeEach
     void init() {
-        DaoTestConfig.dynamoDBLocalSetup(dynamoDbAsyncClient, dbEnhancedAsyncClient);
+        DaoTestConfig.dynamoDBLocalSetup(amazonDynamoDB, dynamoDBMapper);
     }
 
     @Test
@@ -69,18 +69,14 @@ class TokenizerConnectorImplTest {
         String pii = "savePii";
         String namespace = "saveSelfcare";
         // when
-        // saves pii and namespace. We call block API because we want to set a precondition
-        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
-        TokenDto savedNewTokenDto = tokenizerConnector.save(pii, namespace).block();
+        TokenDto savedNewTokenDto = tokenizerConnector.save(pii, namespace);
+        TokenDto savedExistingTokenDto = tokenizerConnector.save(pii, namespace);
         // then
-        StepVerifier.create(tokenizerConnector.save(pii, namespace)).assertNext(savedExistingTokenDto -> {
-            assertNotNull(savedNewTokenDto);
-            assertNotNull(savedNewTokenDto.getRootToken());
-            assertNotNull(savedNewTokenDto.getToken());
-            assertEquals(savedNewTokenDto.getRootToken(), savedExistingTokenDto.getRootToken());
-            assertEquals(savedNewTokenDto.getToken(), savedExistingTokenDto.getToken());
-        })
-                .verifyComplete();
+        assertNotNull(savedNewTokenDto);
+        assertNotNull(savedNewTokenDto.getRootToken());
+        assertNotNull(savedNewTokenDto.getToken());
+        assertEquals(savedNewTokenDto.getRootToken(), savedExistingTokenDto.getRootToken());
+        assertEquals(savedNewTokenDto.getToken(), savedExistingTokenDto.getToken());
     }
 
     @Test
@@ -115,10 +111,9 @@ class TokenizerConnectorImplTest {
         String pii = "piiNotFound";
         String namespace = "selfcare";
         // when
-        Mono<TokenDto> found = tokenizerConnector.findById(pii, namespace);
+        Optional<TokenDto> found = tokenizerConnector.findById(pii, namespace);
         // then
-        StepVerifier.create(found)
-                .expectComplete();
+        assertTrue(found.isEmpty());
     }
 
 
@@ -127,19 +122,14 @@ class TokenizerConnectorImplTest {
         // given
         String pii = "savedPii";
         String namespace = "savedSelfcare";
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        // saves pii and namespace. We call block API because we want to set a precondition
-        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace).block();
+        Optional<TokenDto> found = tokenizerConnector.findById(pii, namespace);
         // then
-        StepVerifier.create(tokenizerConnector.findById(pii, namespace))
-                .assertNext(found -> {
-                    assertNotNull(found);
-                    assertEquals(tokenDto.getRootToken(), found.getRootToken());
-                    assertEquals(tokenDto.getToken(), found.getToken());
-                })
-                .verifyComplete();
-}
+        assertTrue(found.isPresent());
+        assertEquals(tokenDto.getRootToken(), found.get().getRootToken());
+        assertEquals(tokenDto.getToken(), found.get().getToken());
+    }
 
     @Test
     void findPiiByToken_nullToken() {
@@ -159,14 +149,12 @@ class TokenizerConnectorImplTest {
         // given
         String pii = "pii";
         String namespace = "selfcare";
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        // saves pii and namespace. We call block API because we want to set a precondition
-        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace).block();
-        //then
-        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), GlobalFiscalCodeToken.NAMESPACE))
-                .expectNext(pii)
-                .verifyComplete();
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getRootToken(), GlobalFiscalCodeToken.NAMESPACE);
+        // then
+        assertTrue(found.isPresent());
+        assertEquals(pii, found.get());
     }
 
 
@@ -175,14 +163,12 @@ class TokenizerConnectorImplTest {
         // given
         String pii = "pii";
         String namespace = "selfcare";
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        // saves pii and namespace. We call block API because we want to set a precondition
-        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace).block();
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), namespace);
         // then
-        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getToken(), namespace))
-                .expectNext(pii)
-                .verifyComplete();
+        assertTrue(found.isPresent());
+        assertEquals(pii, found.get());
     }
 
     @Test
@@ -191,14 +177,11 @@ class TokenizerConnectorImplTest {
         String pii = "pii";
         String namespace = "selfcare";
         String notAllowedNamespace = "idpay";
+        TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
         // when
-        // saves pii and namespace. We call block API because we want to set a precondition
-        // we are not testing here the reactive behaviour which we want to test into the StepVerifier
-        TokenDto tokenDto = tokenizerConnector.save(pii, namespace).block();
-
+        Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace);
         // then
-        StepVerifier.create(tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace))
-                .verifyComplete();
+        assertFalse(found.isPresent());
     }
 
 }

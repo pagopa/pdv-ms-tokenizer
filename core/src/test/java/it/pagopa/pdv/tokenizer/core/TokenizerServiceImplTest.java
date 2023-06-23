@@ -10,11 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class TokenizerServiceImplTest {
@@ -61,13 +60,11 @@ class TokenizerServiceImplTest {
         String namespace = "selfcare";
         TokenDto tokenDtoStub = new TokenDto();
         Mockito.when(tokenizerConnector.save(Mockito.any(), Mockito.any()))
-                .thenReturn(Mono.just(tokenDtoStub));
+                .thenReturn(tokenDtoStub);
         // when
-        StepVerifier.create(tokenizerService.save(pii, namespace))
-                .expectNext(tokenDtoStub)
-                .verifyComplete()
-        ;
+        TokenDto tokenDto = tokenizerService.save(pii, namespace);
         // then
+        assertSame(tokenDtoStub, tokenDto);
         Mockito.verify(tokenizerConnector, Mockito.times(1))
                 .save(pii, namespace);
         Mockito.verifyNoMoreInteractions(tokenizerConnector);
@@ -108,12 +105,11 @@ class TokenizerServiceImplTest {
         String pii = "pii";
         String namespace = "selfcare";
         Mockito.when(tokenizerConnector.findById(Mockito.any(), Mockito.any()))
-                .thenReturn(Mono.empty());
+                .thenReturn(Optional.empty());
         // when
-        StepVerifier.create(tokenizerService.findById(pii, namespace))
-                .expectError(ResourceNotFoundException.class)
-                .verify();
+        Executable executable = () -> tokenizerService.findById(pii, namespace);
         // then
+        assertThrows(ResourceNotFoundException.class, executable);
         Mockito.verify(tokenizerConnector, Mockito.times(1))
                 .findById(pii, namespace);
         Mockito.verifyNoMoreInteractions(tokenizerConnector);
@@ -127,12 +123,11 @@ class TokenizerServiceImplTest {
         String namespace = "selfcare";
         TokenDto tokenDtoStub = new TokenDto();
         Mockito.when(tokenizerConnector.findById(Mockito.any(), Mockito.any()))
-                .thenReturn(Mono.just(tokenDtoStub));
+                .thenReturn(Optional.of(tokenDtoStub));
         // when
-        StepVerifier.create(tokenizerService.findById(pii, namespace))
-                .expectNext(tokenDtoStub)
-                .verifyComplete();
+        TokenDto tokenDto = tokenizerService.findById(pii, namespace);
         // then
+        assertSame(tokenDtoStub, tokenDto);
         Mockito.verify(tokenizerConnector, Mockito.times(1))
                 .findById(pii, namespace);
         Mockito.verifyNoMoreInteractions(tokenizerConnector);
@@ -159,12 +154,11 @@ class TokenizerServiceImplTest {
         String token = "token";
         String namespace = "namespace";
         Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any(), Mockito.any()))
-                .thenReturn(Mono.empty());
+                .thenReturn(Optional.empty());
         // when
-        StepVerifier.create(tokenizerService.findPiiByToken(token, namespace))
-                .expectError(ResourceNotFoundException.class)
-                .verify();
+        Executable executable = () -> tokenizerService.findPiiByToken(token, namespace);
         // then
+        assertThrows(ResourceNotFoundException.class, executable);
         Mockito.verify(tokenizerConnector, Mockito.times(1))
                 .findPiiByToken(token, namespace);
         Mockito.verifyNoMoreInteractions(tokenizerConnector);
@@ -179,12 +173,11 @@ class TokenizerServiceImplTest {
         String namespace = "namespace";
 
         Mockito.when(tokenizerConnector.findPiiByToken(Mockito.any(), Mockito.any()))
-                .thenReturn(Mono.just(piiStub));
+                .thenReturn(Optional.of(piiStub));
         // when
-        StepVerifier.create(tokenizerService.findPiiByToken(token, namespace))
-                .expectNext(piiStub)
-                .verifyComplete();
+        String pii = tokenizerService.findPiiByToken(token, namespace);
         // then
+        assertSame(piiStub, pii);
         Mockito.verify(tokenizerConnector, Mockito.times(1))
                 .findPiiByToken(token, namespace);
         Mockito.verifyNoMoreInteractions(tokenizerConnector);

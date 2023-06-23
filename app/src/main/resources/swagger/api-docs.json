@@ -5,6 +5,10 @@
     "description" : "Tokenizer API documentation",
     "version" : "1.0-SNAPSHOT"
   },
+  "servers" : [ {
+    "url" : "http://localhost:80",
+    "description" : "Inferred Url"
+  } ],
   "tags" : [ {
     "name" : "token",
     "description" : "Token operations"

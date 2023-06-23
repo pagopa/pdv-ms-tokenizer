@@ -1,17 +1,17 @@
 package it.pagopa.pdv.tokenizer.connector.dao.config;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-
-import java.net.URI;
 
 @Configuration
 class DynamoDBConfig {
@@ -21,16 +21,22 @@ class DynamoDBConfig {
     static class Cloud {
 
         @Bean
-        public DynamoDbAsyncClient dynamoDbAsyncClient() {
-            return DynamoDbAsyncClient.builder().build();
+        public AmazonDynamoDB amazonDynamoDB() {
+            return AmazonDynamoDBClientBuilder
+                    .standard()
+                    .build();
         }
 
 
         @Bean
-        public DynamoDbEnhancedAsyncClient getDynamoDbEnhancedAsyncClient() {
-            return DynamoDbEnhancedAsyncClient.builder()
-                    .dynamoDbClient(dynamoDbAsyncClient())
-                    .build();
+        public DynamoDBMapper dynamoDBMapper(AmazonDynamoDB amazonDynamoDB) {
+            return new DynamoDBMapper(amazonDynamoDB);
+        }
+
+
+        @Bean
+        public DynamoDB dynamoDB(AmazonDynamoDB amazonDynamoDB) {
+            return new DynamoDB(amazonDynamoDB);
         }
 
     }
@@ -55,20 +61,25 @@ class DynamoDBConfig {
 
 
         @Bean
-        public DynamoDbAsyncClient dynamoDbAsyncClient() {
-            return DynamoDbAsyncClient.builder()
-                    .region(Region.EU_SOUTH_1)
-                    .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
-                    .endpointOverride(URI.create(dynamoDBEndpoint))
+        public AmazonDynamoDB amazonDynamoDB() {
+            return AmazonDynamoDBClientBuilder
+                    .standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey)))
+                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(dynamoDBEndpoint, region))
                     .build();
         }
 
 
         @Bean
-        public DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient() {
-            return DynamoDbEnhancedAsyncClient.builder()
-                    .dynamoDbClient(dynamoDbAsyncClient())
-                    .build();
+        public DynamoDBMapper dynamoDBMapper(AmazonDynamoDB amazonDynamoDB) {
+            DynamoDBMapper dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB);
+            return dynamoDBMapper;
+        }
+
+
+        @Bean
+        public DynamoDB dynamoDB(AmazonDynamoDB amazonDynamoDB) {
+            return new DynamoDB(amazonDynamoDB);
         }
 
     }

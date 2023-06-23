@@ -1,37 +1,24 @@
 package it.pagopa.pdv.tokenizer.connector.dao.model;
 
 
+import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.UpdateBehavior;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
-
-import java.util.UUID;
 
 import static it.pagopa.pdv.tokenizer.connector.dao.model.Status.ACTIVE;
 
 @Data
 @FieldNameConstants(onlyExplicitlyIncluded = true)
-@DynamoDbBean
+@DynamoDBTable(tableName = "Token")
 public class GlobalFiscalCodeToken {
 
     public static final String NAMESPACE = "GLOBAL";
 
+
+    @DynamoDBHashKey(attributeName = "PK")
     private String pii;
-    @FieldNameConstants.Include
-    private String token;
-    @FieldNameConstants.Include
-    private Status status = ACTIVE;
 
-
-    @DynamoDbPartitionKey
-    @DynamoDbAttribute("PK")
-    public String getPii() {
-        return pii;
-    }
-
-    @DynamoDbSortKey
-    @DynamoDbAttribute("SK")
+    @DynamoDBRangeKey(attributeName = "SK")
     public String getNamespace() {
         return NAMESPACE;
     }
@@ -40,14 +27,14 @@ public class GlobalFiscalCodeToken {
         // intentionally left blank: SK is static data
     }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = "gsi_token")
-    @DynamoDbUpdateBehavior(UpdateBehavior.WRITE_IF_NOT_EXISTS)
-    public String getToken() {
-        return token;
-    }
+    @DynamoDBIndexHashKey(globalSecondaryIndexName = "gsi_token")
+    @DynamoDBGeneratedUuid(DynamoDBAutoGenerateStrategy.CREATE)
+    @FieldNameConstants.Include
+    private String token;
 
-    public GlobalFiscalCodeToken(){
-        token = UUID.randomUUID().toString();
-    }
+    @DynamoDBAttribute
+    @FieldNameConstants.Include
+    @DynamoDBTypeConvertedEnum
+    private Status status = ACTIVE;
 
 }
