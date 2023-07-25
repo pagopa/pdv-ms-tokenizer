@@ -1,7 +1,6 @@
 package it.pagopa.pdv.tokenizer.web.model;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,28 +17,28 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-@ApiModel(description = "A \"problem detail\" as a way to carry machine-readable details of errors (https://datatracker.ietf.org/doc/html/rfc7807)")
+@Schema(description = "A \"problem detail\" as a way to carry machine-readable details of errors (https://datatracker.ietf.org/doc/html/rfc7807)")
 public class Problem implements Serializable {
 
-    @ApiModelProperty(value = "A URL to a page with more details regarding the problem.")
+    @Schema(description = "A URL to a page with more details regarding the problem.")
     private String type;
 
-    @ApiModelProperty(value = "Short human-readable summary of the problem.", required = true)
+    @Schema(description = "Short human-readable summary of the problem.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank
     private String title;
 
-    @ApiModelProperty(value = "The HTTP status code.", required = true, example = "500")
+    @Schema(description = "The HTTP status code.", requiredMode = Schema.RequiredMode.REQUIRED, example = "500")
     @Min(100)
     @Max(599)
     private int status;
 
-    @ApiModelProperty(value = "Human-readable description of this specific problem.")
+    @Schema(description = "Human-readable description of this specific problem.")
     private String detail;
 
-    @ApiModelProperty(value = "A URI that describes where the problem occurred.")
+    @Schema(description = "A URI that describes where the problem occurred.")
     private String instance;
 
-    @ApiModelProperty(value = "A list of invalid parameters details.")
+    @Schema(description = "A list of invalid parameters details.")
     private List<InvalidParam> invalidParams;
 
 
@@ -69,11 +68,11 @@ public class Problem implements Serializable {
     @AllArgsConstructor
     public static class InvalidParam {
 
-        @ApiModelProperty(value = "Invalid parameter name.", required = true)
+        @Schema(description = "Invalid parameter name.", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank
         private String name;
 
-        @ApiModelProperty(value = "Invalid parameter reason.", required = true)
+        @Schema(description = "Invalid parameter reason.", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank
         private String reason;
 
