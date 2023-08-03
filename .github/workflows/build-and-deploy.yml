@@ -69,6 +69,8 @@ jobs:
             matrixStringifiedObject="{\"include\":[{\"environment\":\"prod\", \"env_short\": \"p\"}]}"
           elif [ ${{ github.event.pull_request.base.ref == 'release-uat' }} == true ]; then
             matrixStringifiedObject="{\"include\":[{\"environment\":\"uat\", \"env_short\": \"u\"}]}"
+          elif [ ${{ github.event.pull_request.base.ref == 'release-dev' }} == true ]; then
+            matrixStringifiedObject="{\"include\":[{\"environment\":\"dev\", \"env_short\": \"d\"}]}"          
           else
             matrixStringifiedObject=""
           fi
