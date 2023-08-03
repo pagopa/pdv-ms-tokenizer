@@ -14,6 +14,7 @@ spring:
     include:
       # TO enable specific-language documentations
       - swaggerEN
+      - ${APP_PROFILE_LOCAL}
   zipkin:
     enabled: false
   sleuth:
@@ -26,6 +27,11 @@ info:
     name: "@project.parent.artifactId@"
     description: "@project.description@"
     version: "@project.version@"
+
+springdoc:
+  api-docs:
+    resolve-schema-properties: true
+  writer-with-order-by-keys: true
 
 logging:
   level:
