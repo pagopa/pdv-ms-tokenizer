@@ -8,7 +8,15 @@ on:
       - "**/src/**"
       - "**pom.xml"
       - ".github/workflows/code-review.yml"
-
+    pull_request_target:
+      types:
+        - opened
+        - edited
+        - synchronize
+      paths:
+        - "**/src/**"
+        - "**pom.xml"
+        - ".github/workflows/code-review.yml"
 jobs:
   build:
     runs-on: ubuntu-22.04
