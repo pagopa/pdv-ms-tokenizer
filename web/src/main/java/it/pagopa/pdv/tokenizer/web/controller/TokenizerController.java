@@ -1,18 +1,20 @@
 package it.pagopa.pdv.tokenizer.web.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.TokenizerService;
+import it.pagopa.pdv.tokenizer.web.annotations.CommonApiResponsesWrapper;
 import it.pagopa.pdv.tokenizer.web.model.PiiResource;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
 import it.pagopa.pdv.tokenizer.web.model.TokenResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +26,7 @@ import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;
 @Slf4j
 @RestController
 @RequestMapping(value = "tokens", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(tags = "token")
+@Tag(name = "token")
 public class TokenizerController {
 
     private static final String NAMESPACE_HEADER_NAME = "x-pagopa-namespace";
@@ -39,10 +41,12 @@ public class TokenizerController {
     }
 
 
-    @ApiOperation(value = "${swagger.api.tokens.save.summary}",
-            notes = "${swagger.api.tokens.save.notes}")
+    @Operation(summary = "${swagger.api.tokens.save.summary}",
+            description = "${swagger.api.tokens.save.notes}")
+    @CommonApiResponsesWrapper
     @PutMapping(value = "")
-    public TokenResource save(@ApiParam("${swagger.model.namespace}")
+    @ResponseStatus(HttpStatus.OK)
+    public TokenResource save(@Parameter(description = "${swagger.model.namespace}")
                               @RequestHeader(NAMESPACE_HEADER_NAME)
                                       String namespace,
                               @RequestBody
@@ -60,8 +64,9 @@ public class TokenizerController {
     }
 
 
-    @ApiOperation(value = "${swagger.api.tokens.search.summary}",
-            notes = "${swagger.api.tokens.search.notes}")
+    @Operation(summary = "${swagger.api.tokens.search.summary}",
+            description = "${swagger.api.tokens.search.notes}")
+    @CommonApiResponsesWrapper
     @ApiResponse(responseCode = "404",
             description = "Not Found",
             content = {
@@ -69,7 +74,8 @@ public class TokenizerController {
                             schema = @Schema(implementation = Problem.class))
             })
     @PostMapping(value = "search")
-    public TokenResource search(@ApiParam("${swagger.model.namespace}")
+    @ResponseStatus(HttpStatus.OK)
+    public TokenResource search(@Parameter(description = "${swagger.model.namespace}")
                                 @RequestHeader(NAMESPACE_HEADER_NAME)
                                         String namespace,
                                 @RequestBody
@@ -87,12 +93,20 @@ public class TokenizerController {
     }
 
 
-    @ApiOperation(value = "${swagger.api.tokens.findPii.summary}",
-            notes = "${swagger.api.tokens.findPii.notes}")
+    @Operation(summary = "${swagger.api.tokens.findPii.summary}",
+            description = "${swagger.api.tokens.findPii.notes}")
+    @CommonApiResponsesWrapper
+    @ApiResponse(responseCode = "404",
+            description = "Not Found",
+            content = {
+                    @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = Problem.class))
+            })
     @GetMapping(value = "{token}/pii")
-    public PiiResource findPii(@ApiParam("${swagger.model.token}")
+    @ResponseStatus(HttpStatus.OK)
+    public PiiResource findPii(@Parameter(description = "${swagger.model.token}")
                                @PathVariable UUID token,
-                               @ApiParam("${swagger.model.namespace}")
+                               @Parameter(description = "${swagger.model.namespace}")
                                @RequestHeader(NAMESPACE_HEADER_NAME)
                                String namespace) {
         log.trace("[findPii] start");

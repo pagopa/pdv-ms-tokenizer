@@ -1,29 +1,23 @@
 {
-  "openapi" : "3.0.3",
+  "openapi" : "3.0.1",
   "info" : {
-    "title" : "pdv-ms-tokenizer",
     "description" : "Tokenizer API documentation",
+    "title" : "pdv-ms-tokenizer",
     "version" : "1.0-SNAPSHOT"
   },
   "servers" : [ {
-    "url" : "http://localhost:80",
-    "description" : "Inferred Url"
-  } ],
-  "tags" : [ {
-    "name" : "token",
-    "description" : "Token operations"
+    "url" : "http://localhost",
+    "description" : "Generated server url"
   } ],
   "paths" : {
     "/tokens" : {
       "put" : {
-        "tags" : [ "token" ],
-        "summary" : "Upsert token",
         "description" : "Create a new token given a PII and Namespace, if already exists do nothing",
-        "operationId" : "saveUsingPUT",
+        "operationId" : "save",
         "parameters" : [ {
-          "name" : "x-pagopa-namespace",
-          "in" : "header",
           "description" : "Caller visibility context",
+          "in" : "header",
+          "name" : "x-pagopa-namespace",
           "required" : true,
           "schema" : {
             "type" : "string"
@@ -36,62 +30,63 @@
                 "$ref" : "#/components/schemas/PiiResource"
               }
             }
-          }
+          },
+          "required" : true
         },
         "responses" : {
           "200" : {
-            "description" : "OK",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/TokenResource"
                 }
               }
-            }
+            },
+            "description" : "OK"
           },
           "400" : {
-            "description" : "Bad Request",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Bad Request"
           },
           "429" : {
-            "description" : "Too Many Requests",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Too Many Requests"
           },
           "500" : {
-            "description" : "Internal Server Error",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Internal Server Error"
           }
-        }
+        },
+        "summary" : "Upsert token",
+        "tags" : [ "token" ]
       }
     },
     "/tokens/search" : {
       "post" : {
-        "tags" : [ "token" ],
-        "summary" : "Search token",
         "description" : "Search a token given a PII and Namespace",
-        "operationId" : "searchUsingPOST",
+        "operationId" : "search",
         "parameters" : [ {
-          "name" : "x-pagopa-namespace",
-          "in" : "header",
           "description" : "Caller visibility context",
+          "in" : "header",
+          "name" : "x-pagopa-namespace",
           "required" : true,
           "schema" : {
             "type" : "string"
@@ -104,82 +99,82 @@
                 "$ref" : "#/components/schemas/PiiResource"
               }
             }
-          }
+          },
+          "required" : true
         },
         "responses" : {
           "200" : {
-            "description" : "OK",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/TokenResource"
                 }
               }
-            }
+            },
+            "description" : "OK"
           },
           "400" : {
-            "description" : "Bad Request",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Bad Request"
           },
           "404" : {
-            "description" : "Not Found",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Not Found"
           },
           "429" : {
-            "description" : "Too Many Requests",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Too Many Requests"
           },
           "500" : {
-            "description" : "Internal Server Error",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Internal Server Error"
           }
-        }
+        },
+        "summary" : "Search token",
+        "tags" : [ "token" ]
       }
     },
     "/tokens/{token}/pii" : {
       "get" : {
-        "tags" : [ "token" ],
-        "summary" : "Find PII",
         "description" : "Find a PII given a token",
-        "operationId" : "findPiiUsingGET",
+        "operationId" : "findPii",
         "parameters" : [ {
-          "name" : "token",
-          "in" : "path",
           "description" : "Token related to the PII",
+          "in" : "path",
+          "name" : "token",
           "required" : true,
-          "style" : "simple",
           "schema" : {
             "type" : "string",
             "format" : "uuid"
           }
         }, {
-          "name" : "x-pagopa-namespace",
-          "in" : "header",
           "description" : "Caller visibility context",
+          "in" : "header",
+          "name" : "x-pagopa-namespace",
           "required" : true,
           "schema" : {
             "type" : "string"
@@ -187,65 +182,66 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/PiiResource"
                 }
               }
-            }
+            },
+            "description" : "OK"
           },
           "400" : {
-            "description" : "Bad Request",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Bad Request"
           },
           "404" : {
-            "description" : "Not Found",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Not Found"
           },
           "429" : {
-            "description" : "Too Many Requests",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Too Many Requests"
           },
           "500" : {
-            "description" : "Internal Server Error",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
-            }
+            },
+            "description" : "Internal Server Error"
           }
-        }
+        },
+        "summary" : "Find PII",
+        "tags" : [ "token" ]
       }
     }
   },
   "components" : {
     "schemas" : {
       "InvalidParam" : {
-        "title" : "InvalidParam",
-        "required" : [ "name", "reason" ],
         "type" : "object",
+        "description" : "A list of invalid parameters details.",
         "properties" : {
           "name" : {
             "type" : "string",
@@ -255,23 +251,22 @@
             "type" : "string",
             "description" : "Invalid parameter reason."
           }
-        }
+        },
+        "required" : [ "name", "reason" ]
       },
       "PiiResource" : {
-        "title" : "PiiResource",
-        "required" : [ "pii" ],
         "type" : "object",
         "properties" : {
           "pii" : {
             "type" : "string",
             "description" : "Personal Identifiable Information"
           }
-        }
+        },
+        "required" : [ "pii" ]
       },
       "Problem" : {
-        "title" : "Problem",
-        "required" : [ "status", "title" ],
         "type" : "object",
+        "description" : "A \"problem detail\" as a way to carry machine-readable details of errors (https://datatracker.ietf.org/doc/html/rfc7807)",
         "properties" : {
           "detail" : {
             "type" : "string",
@@ -289,6 +284,8 @@
             }
           },
           "status" : {
+            "maximum" : 599,
+            "minimum" : 100,
             "type" : "integer",
             "description" : "The HTTP status code.",
             "format" : "int32",
@@ -303,11 +300,9 @@
             "description" : "A URL to a page with more details regarding the problem."
           }
         },
-        "description" : "A \"problem detail\" as a way to carry machine-readable details of errors (https://datatracker.ietf.org/doc/html/rfc7807)"
+        "required" : [ "status", "title" ]
       },
       "TokenResource" : {
-        "title" : "TokenResource",
-        "required" : [ "rootToken", "token" ],
         "type" : "object",
         "properties" : {
           "rootToken" : {
@@ -320,7 +315,8 @@
             "description" : "Namespaced token related to the PII",
             "format" : "uuid"
           }
-        }
+        },
+        "required" : [ "rootToken", "token" ]
       }
     }
   }
