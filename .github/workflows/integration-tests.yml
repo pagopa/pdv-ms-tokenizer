@@ -1,0 +1,41 @@
+name: "Integration-Tests"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose environment'
+        type: choice
+        required: true
+        default: dev
+        options:
+        - dev
+        - uat
+
+permissions:
+  contents: read
+
+jobs:
+  k6-integration-tests:
+    if: ${{ github.event_name == 'workflow_dispatch'}}
+    name: integration-tests
+    runs-on: ubuntu-22.04
+    environment: ${{ inputs.environment }}
+
+
+    steps:
+      - name: Checkout
+        #actions/checkout@3.2.0
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+
+      - name: Run local k6 test
+        #grafana/k6-action@0.3.0
+        uses: grafana/k6-action@2bd221c807b7cdbe4bb3abc6b3fa4d2da499fa9b
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          HOST_NAME: ${{ env.HOST_NAME }}
+          TEST_EXISTING_TOKEN: ${{ secrets.TEST_EXISTING_TOKEN }}
+          TEST_NOT_EXISTING_TOKEN: ${{ secrets.TEST_NOT_EXISTING_TOKEN }}
+          TEST_NOT_ALLOWED_TOKEN: ${{ secrets.TEST_NOT_ALLOWED_TOKEN }}
+        with:
+          filename: integration-tests/integration.js
