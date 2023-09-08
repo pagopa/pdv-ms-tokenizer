@@ -46,3 +46,8 @@ jobs:
           TEST_NOT_ALLOWED_TOKEN: ${{ secrets.TEST_NOT_ALLOWED_TOKEN }}
         with:
           filename: integration-tests/integration.js
+          
+      - name: Manage exit code
+        shell: bash
+        run: |
+          var=$(jq -r ".failed" tmp.json) ; exit $var
