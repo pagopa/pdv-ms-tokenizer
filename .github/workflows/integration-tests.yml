@@ -21,7 +21,8 @@ permissions:
 
 jobs:
   k6-integration-tests:
-    if: ${{ github.event_name == 'workflow_dispatch'}}
+    # TODO: uncomment this line
+    #if: ${{ github.event_name == 'workflow_dispatch'}}
     name: integration-tests
     runs-on: ubuntu-22.04
     environment: ${{ inputs.environment }}
