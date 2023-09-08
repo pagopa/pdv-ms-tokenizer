@@ -25,7 +25,9 @@ jobs:
     #if: ${{ github.event_name == 'workflow_dispatch'}}
     name: integration-tests
     runs-on: ubuntu-22.04
-    environment: ${{ inputs.environment }}
+    environment: dev
+    #TODO: uncomment this line and remove line above
+    #environment: ${{ inputs.environment }}
 
 
     steps:
