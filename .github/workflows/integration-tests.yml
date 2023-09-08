@@ -1,6 +1,9 @@
 name: "Integration-Tests"
 
 on:
+  push:
+    branches:
+      - "integration-testing"
   workflow_dispatch:
     inputs:
       environment:
