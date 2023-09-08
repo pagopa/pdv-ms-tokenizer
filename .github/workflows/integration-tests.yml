@@ -1,9 +1,8 @@
 name: "Integration-Tests"
 
 on:
-  push:
-    branches:
-      - "integration-testing"
+  # TODO: remove
+  pull_request:
   workflow_dispatch:
     inputs:
       environment:
