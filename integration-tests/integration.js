@@ -56,7 +56,7 @@ export default function () {
     },
     test_assertions_params: {
       name: 'Get pii when a valid x-amzn-trace-id is provided',
-      expected_status: 202,
+      expected_status: 200,
       description: 'This test should return a 200 status code because we are sending a valid x-amzn-trace-id',
     }
   },
