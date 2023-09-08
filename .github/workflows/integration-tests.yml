@@ -40,7 +40,7 @@ jobs:
         uses: grafana/k6-action@2bd221c807b7cdbe4bb3abc6b3fa4d2da499fa9b
         env:
           API_KEY: ${{ secrets.API_KEY }}
-          HOST_NAME: ${{ env.HOST_NAME }}
+          HOST_NAME: ${{ vars.HOST_NAME }}
           TEST_EXISTING_TOKEN: ${{ secrets.TEST_EXISTING_TOKEN }}
           TEST_NOT_EXISTING_TOKEN: ${{ secrets.TEST_NOT_EXISTING_TOKEN }}
           TEST_NOT_ALLOWED_TOKEN: ${{ secrets.TEST_NOT_ALLOWED_TOKEN }}
