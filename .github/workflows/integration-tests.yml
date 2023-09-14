@@ -78,7 +78,7 @@ jobs:
           echo "matrix=$matrixStringifiedObject" >> $GITHUB_OUTPUT
 
   k6-integration-tests-pull-request:
-    if: ${{ needs.build.outputs.matrix != '' }}
+    if: ${{ needs.set-matrix.outputs.matrix != '' }}
     name: integration-tests
     needs: set-matrix
     runs-on: ubuntu-22.04
