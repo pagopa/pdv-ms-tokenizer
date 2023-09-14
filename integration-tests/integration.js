@@ -1,5 +1,6 @@
 import http from 'k6/http';
 import { check } from 'k6';
+import exec from 'k6/execution';
 
 export default function () {
 
@@ -177,5 +178,6 @@ export function handleSummary(data) {
 
   return {
     stdout: checks_message,
+    "./tmp.json": JSON.stringify({failed: checks.fails===0 ? 0: 1})
   };
 }

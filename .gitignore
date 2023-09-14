@@ -13,6 +13,9 @@ target/
 .springBeans
 .sts4-cache
 
+### k6 ###
+**/tmp.json
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
