@@ -1,6 +1,17 @@
 name: "Integration-Tests"
 
 on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - "main"
+      - "release-*"
+    paths:
+      - "**/src/main/**"
+      - "**pom.xml"
+      - "Dockerfile"
+      - ".github/workflows/integration-tests.yml"
   workflow_dispatch:
     inputs:
       environment:
@@ -16,12 +27,11 @@ permissions:
   contents: read
 
 jobs:
-  k6-integration-tests:
+  k6-integration-tests-workflow-dispatch:
     if: ${{ github.event_name == 'workflow_dispatch'}}
     name: integration-tests
     runs-on: ubuntu-22.04
     environment: ${{ inputs.environment }}
-
 
     steps:
       - name: Checkout
@@ -33,9 +43,66 @@ jobs:
         uses: grafana/k6-action@2bd221c807b7cdbe4bb3abc6b3fa4d2da499fa9b
         env:
           API_KEY: ${{ secrets.API_KEY }}
-          HOST_NAME: ${{ env.HOST_NAME }}
+          HOST_NAME: ${{ vars.HOST_NAME }}
           TEST_EXISTING_TOKEN: ${{ secrets.TEST_EXISTING_TOKEN }}
           TEST_NOT_EXISTING_TOKEN: ${{ secrets.TEST_NOT_EXISTING_TOKEN }}
           TEST_NOT_ALLOWED_TOKEN: ${{ secrets.TEST_NOT_ALLOWED_TOKEN }}
         with:
           filename: integration-tests/integration.js
+          
+      - name: Manage exit code
+        shell: bash
+        run: |
+          var=$(jq -r ".failed" tmp.json) ; exit $var
+
+  set-matrix:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.merged == true }}
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.setmatrix.outputs.matrix }}
+
+    steps:
+      - name: Set Dynamic Env Matrix
+        id: setmatrix
+        run: |
+          if [ ${{ github.event.pull_request.base.ref == 'main' }} == true ]; then 
+            matrixStringifiedObject="{\"include\":[{\"environment\":\"prod\", \"env_short\": \"p\"}]}"
+          elif [ ${{ github.event.pull_request.base.ref == 'release-uat' }} == true ]; then
+            matrixStringifiedObject="{\"include\":[{\"environment\":\"uat\", \"env_short\": \"u\"}]}"
+          elif [ ${{ github.event.pull_request.base.ref == 'release-dev' }} == true ]; then
+            matrixStringifiedObject="{\"include\":[{\"environment\":\"dev\", \"env_short\": \"d\"}]}"          
+          else
+            matrixStringifiedObject=""
+          fi
+          
+          echo "matrix=$matrixStringifiedObject" >> $GITHUB_OUTPUT
+
+  k6-integration-tests-pull-request:
+    if: ${{ needs.build.outputs.matrix != '' }}
+    name: integration-tests
+    needs: set-matrix
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix: ${{ fromJson(needs.build.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        #actions/checkout@3.2.0
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+
+      - name: Run local k6 test
+        #grafana/k6-action@0.3.0
+        uses: grafana/k6-action@2bd221c807b7cdbe4bb3abc6b3fa4d2da499fa9b
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          HOST_NAME: ${{ vars.HOST_NAME }}
+          TEST_EXISTING_TOKEN: ${{ secrets.TEST_EXISTING_TOKEN }}
+          TEST_NOT_EXISTING_TOKEN: ${{ secrets.TEST_NOT_EXISTING_TOKEN }}
+          TEST_NOT_ALLOWED_TOKEN: ${{ secrets.TEST_NOT_ALLOWED_TOKEN }}
+        with:
+          filename: integration-tests/integration.js
+
+      - name: Manage exit code
+        shell: bash
+        run: |
+          var=$(jq -r ".failed" tmp.json) ; exit $var
