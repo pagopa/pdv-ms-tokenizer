@@ -1,10 +1,6 @@
 name: "Integration-Tests"
 
 on:
-  # TODO: remove
-  push:
-    branches:
-      - integration-testing
   workflow_dispatch:
     inputs:
       environment:
@@ -21,13 +17,10 @@ permissions:
 
 jobs:
   k6-integration-tests:
-    # TODO: uncomment this line
-    #if: ${{ github.event_name == 'workflow_dispatch'}}
+    if: ${{ github.event_name == 'workflow_dispatch'}}
     name: integration-tests
     runs-on: ubuntu-22.04
-    environment: dev
-    #TODO: uncomment this line and remove line above
-    #environment: ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}
 
 
     steps:
