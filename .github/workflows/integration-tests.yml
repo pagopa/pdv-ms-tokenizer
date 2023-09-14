@@ -84,6 +84,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
 
     steps:
       - name: Checkout
