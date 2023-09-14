@@ -12,6 +12,7 @@ on:
       - "**pom.xml"
       - "Dockerfile"
       - ".github/workflows/integration-tests.yml"
+
   workflow_dispatch:
     inputs:
       environment:
