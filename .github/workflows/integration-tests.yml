@@ -83,7 +83,7 @@ jobs:
     needs: set-matrix
     runs-on: ubuntu-22.04
     strategy:
-      matrix: ${{ fromJson(needs.build.outputs.matrix) }}
+      matrix: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
 
     steps:
       - name: Checkout
