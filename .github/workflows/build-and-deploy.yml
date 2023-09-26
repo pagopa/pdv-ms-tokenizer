@@ -51,7 +51,7 @@ jobs:
       - name: Set Dynamic Env Matrix
         id: setmatrix
         run: |
-          if [ ${{ github.event.pull_request.base.ref == 'main' }}} == true ]; then 
+          if [ ${{ github.event.pull_request.base.ref == 'main' }} == true ]; then 
             matrixStringifiedObject="{\"include\":[{\"environment\":\"uat\", \"env_short\": \"u\"},{\"environment\":\"prod\", \"env_short\": \"p\"}]}"
           elif [ ${{ github.event.pull_request.base.ref == 'develop' }} == true ]; then
             matrixStringifiedObject="{\"include\":[{\"environment\":\"dev\", \"env_short\": \"d\"}]}"        
