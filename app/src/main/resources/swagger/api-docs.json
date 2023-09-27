@@ -13,6 +13,75 @@
     "/tokens" : {
       "put" : {
         "description" : "Create a new token given a PII and Namespace, if already exists do nothing",
+        "operationId" : "save_1",
+        "parameters" : [ {
+          "description" : "Caller visibility context",
+          "in" : "header",
+          "name" : "x-pagopa-namespace",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PiiResource"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenResource"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description" : "Bad Request"
+          },
+          "429" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description" : "Too Many Requests"
+          },
+          "500" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description" : "Internal Server Error"
+          }
+        },
+        "summary" : "Upsert token",
+        "tags" : [ "token" ]
+      }
+    },
+    "/tokens/" : {
+      "put" : {
+        "description" : "Create a new token given a PII and Namespace, if already exists do nothing",
         "operationId" : "save",
         "parameters" : [ {
           "description" : "Caller visibility context",
