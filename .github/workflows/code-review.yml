@@ -22,8 +22,8 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       AWS_REGION: eu-south-1
-      AWS_ACCESS_KEY_ID: dummy-key
-      AWS_SECRET_KEY: dummy-secrey-key
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_SECRET_KEY: dummy
     steps:
     - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
     - name: Set up JDK
