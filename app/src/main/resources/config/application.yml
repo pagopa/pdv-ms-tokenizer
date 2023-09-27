@@ -17,9 +17,6 @@ spring:
       - ${APP_PROFILE_LOCAL}
   zipkin:
     enabled: false
-  sleuth:
-    propagation:
-      type: AWS
 
 info:
   build:
@@ -32,6 +29,12 @@ springdoc:
   api-docs:
     resolve-schema-properties: true
   writer-with-order-by-keys: true
+
+management:
+  tracing:
+    enabled: true
+  sampling:
+    probability: 1.0
 
 logging:
   level:

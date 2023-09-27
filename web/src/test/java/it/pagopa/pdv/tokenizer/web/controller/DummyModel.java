@@ -1,9 +1,8 @@
 package it.pagopa.pdv.tokenizer.web.controller;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotNull;
 
 @NoArgsConstructor
 @AllArgsConstructor
