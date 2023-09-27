@@ -4,6 +4,8 @@ import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestsException;
 import it.pagopa.pdv.tokenizer.core.exception.ResourceNotFoundException;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
 import it.pagopa.pdv.tokenizer.web.model.mapper.ProblemMapper;
+import jakarta.servlet.ServletException;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,8 +18,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-import javax.servlet.ServletException;
-import javax.validation.ValidationException;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.*;

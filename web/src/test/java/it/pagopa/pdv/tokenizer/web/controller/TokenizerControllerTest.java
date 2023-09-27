@@ -53,7 +53,7 @@ class TokenizerControllerTest {
                 .thenReturn(tokenDto);
         // when
         mvc.perform(MockMvcRequestBuilders
-                .put(BASE_URL + "/")
+                .put(BASE_URL)
                 .header(NAMESPACE_HEADER_NAME, namespace)
                 .content(piiResource.getInputStream().readAllBytes())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

@@ -12,13 +12,13 @@ import it.pagopa.pdv.tokenizer.web.annotations.CommonApiResponsesWrapper;
 import it.pagopa.pdv.tokenizer.web.model.PiiResource;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
 import it.pagopa.pdv.tokenizer.web.model.TokenResource;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.UUID;
 
 import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;

@@ -1,6 +1,8 @@
 package it.pagopa.pdv.tokenizer.web.validator;
 
 import it.pagopa.pdv.tokenizer.web.exception.ResponseValidationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -9,8 +11,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 import java.util.*;
 
 @Slf4j
