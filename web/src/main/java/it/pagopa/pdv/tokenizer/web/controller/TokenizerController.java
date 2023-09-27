@@ -25,7 +25,7 @@ import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;
 
 @Slf4j
 @RestController
-@RequestMapping(value = {"tokens","tokens/"}, produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "tokens", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "token")
 public class TokenizerController {
 
