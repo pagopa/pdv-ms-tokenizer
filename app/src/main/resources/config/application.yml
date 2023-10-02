@@ -33,6 +33,12 @@ springdoc:
 management:
   tracing:
     enabled: true
+    baggage:
+      correlation:
+        fields:
+          - x-amzn-trace-id
+      remote-fields:
+        - x-amzn-trace-id
   sampling:
     probability: 1.0
 
