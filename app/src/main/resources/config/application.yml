@@ -15,11 +15,6 @@ spring:
       # TO enable specific-language documentations
       - swaggerEN
       - ${APP_PROFILE_LOCAL}
-  zipkin:
-    enabled: false
-  sleuth:
-    propagation:
-      type: AWS
 
 info:
   build:
@@ -32,6 +27,15 @@ springdoc:
   api-docs:
     resolve-schema-properties: true
   writer-with-order-by-keys: true
+
+management:
+  tracing:
+    baggage:
+      correlation:
+        fields:
+          - x-amzn-trace-id
+      remote-fields:
+        - x-amzn-trace-id
 
 logging:
   level:

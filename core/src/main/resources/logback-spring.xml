@@ -39,7 +39,7 @@
                 </else>
             </if>
             <property name="stdout_log_pattern"
-                      value="%clr(%d{${LOG_DATEFORMAT_PATTERN}}){faint} %clr(%5p) [${appName:-},%X{traceId:-},%X{spanId:-}] %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} ${msg_and_ex_log_pattern}"/>
+                      value="%clr(%d{${LOG_DATEFORMAT_PATTERN}}){faint} %clr(%5p) [${appName:-},%X{traceId:-},%X{spanId:-},%X{x-amzn-trace-id:-}] %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} ${msg_and_ex_log_pattern}"/>
             <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
                 <encoder>
                     <pattern>${stdout_log_pattern}</pattern>

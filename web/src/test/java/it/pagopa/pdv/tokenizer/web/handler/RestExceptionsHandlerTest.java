@@ -3,6 +3,8 @@ package it.pagopa.pdv.tokenizer.web.handler;
 import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestsException;
 import it.pagopa.pdv.tokenizer.core.exception.ResourceNotFoundException;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
+import jakarta.servlet.ServletException;
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -17,8 +19,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-import javax.servlet.ServletException;
-import javax.validation.ValidationException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
