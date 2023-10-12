@@ -4,14 +4,6 @@ on:
   push:
     branches:
       - "**"
-      - "!main"
-      - "!develop"
-  pull_request:
-    types:
-      - closed
-    branches:
-      - "main"
-      - "develop"
     paths:
       - "**/src/main/**"
       - "**pom.xml"
@@ -51,9 +43,9 @@ jobs:
       - name: Set Dynamic Env Matrix
         id: setmatrix
         run: |
-          if [ ${{ github.event.pull_request.base.ref == 'main' }} == true ]; then 
+          if [ ${{ github.ref == 'refs/heads/main' }} == true ]; then 
             matrixStringifiedObject="{\"include\":[{\"environment\":\"uat\", \"env_short\": \"u\"},{\"environment\":\"prod\", \"env_short\": \"p\"}]}"
-          elif [ ${{ github.event.pull_request.base.ref == 'develop' }} == true ]; then
+          elif [ ${{ github.ref == 'refs/heads/develop' }} == true ]; then
             matrixStringifiedObject="{\"include\":[{\"environment\":\"dev\", \"env_short\": \"d\"}]}"        
           else
             matrixStringifiedObject=""
