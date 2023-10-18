@@ -70,6 +70,7 @@ jobs:
       AWS_REGION: eu-south-1
 
     steps:
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
       - name: Release
         if: ${{ matrix.environment == 'prod' }}
         id: release
@@ -83,7 +84,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
       - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a
         with:
           name: app-jar
@@ -140,3 +140,26 @@ jobs:
           service: tokenizer-${{ matrix.env_short }}-service-tokenizer
           cluster: tokenizer-${{ matrix.env_short }}-ecs-cluster
           wait-for-service-stability: true
+
+  k6-integration-tests:
+    if: ${{ needs.build.outputs.matrix != '' }}
+    name: integration-tests
+    needs: [build, deploy]
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix: ${{ fromJson(needs.build.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout
+        #actions/checkout@3.2.0
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+
+      - name: Integration tests
+        uses: ./.github/workflows/integration-tests
+        with:
+          api_key: ${{ secrets.API_KEY }}
+          host_name: ${{ vars.HOST_NAME }}
+          test_existing_token: ${{ secrets.TEST_EXISTING_TOKEN }}
+          test_not_existing_token: ${{ secrets.TEST_NOT_EXISTING_TOKEN }}
+          test_not_allowed_token: ${{ secrets.TEST_NOT_ALLOWED_TOKEN }}
