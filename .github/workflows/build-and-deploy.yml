@@ -58,9 +58,6 @@ jobs:
     if: ${{ needs.build.outputs.matrix != '' }}
     needs: build
     runs-on: ubuntu-22.04
-    permissions:
-      id-token: write
-      contents: read
     strategy:
         matrix: ${{ fromJson(needs.build.outputs.matrix) }}
          
