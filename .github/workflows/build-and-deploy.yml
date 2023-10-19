@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
-      contents: read
+      contents: write
     strategy:
         matrix: ${{ fromJson(needs.build.outputs.matrix) }}
          
