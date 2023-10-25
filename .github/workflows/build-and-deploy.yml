@@ -128,6 +128,7 @@ jobs:
           cluster: tokenizer-${{ matrix.env_short }}-ecs-cluster
           wait-for-service-stability: true
   release:
+    name: "Create Release"
     if: ${{ needs.build.outputs.matrix != '' }}
     needs: [build, deploy]
     runs-on: ubuntu-22.04
