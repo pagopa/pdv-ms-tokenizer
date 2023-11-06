@@ -1,10 +1,11 @@
 package it.pagopa.pdv.tokenizer.connector.dao;
 
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
+import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 
 
 public class DummyConnectorImpl {
-    public void notThrowingProvisionedThroughputExceededException() {
+    public void notThrowingException() {
 
     }
 
@@ -14,6 +15,10 @@ public class DummyConnectorImpl {
 
     public void throwingGenericException() throws Exception {
         throw new Exception("GenericException");
+    }
+
+    public void throwingAmazonDynamoDBException() {
+        throw new AmazonDynamoDBException("AmazonDynamoDBException");
     }
 
 }
