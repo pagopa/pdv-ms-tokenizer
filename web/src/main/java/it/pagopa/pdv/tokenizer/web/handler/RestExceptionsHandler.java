@@ -1,5 +1,6 @@
 package it.pagopa.pdv.tokenizer.web.handler;
 
+import it.pagopa.pdv.tokenizer.connector.exception.BadRequestException;
 import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestsException;
 import it.pagopa.pdv.tokenizer.core.exception.ResourceNotFoundException;
 import it.pagopa.pdv.tokenizer.web.model.Problem;
@@ -61,7 +62,8 @@ public class RestExceptionsHandler {
             ServletException.class,
             MethodArgumentTypeMismatchException.class,
             MaxUploadSizeExceededException.class,
-            HttpMessageNotReadableException.class
+            HttpMessageNotReadableException.class,
+            BadRequestException.class
     })
     ResponseEntity<Problem> handleBadRequestException(Exception e) {
         log.warn(e.toString());
