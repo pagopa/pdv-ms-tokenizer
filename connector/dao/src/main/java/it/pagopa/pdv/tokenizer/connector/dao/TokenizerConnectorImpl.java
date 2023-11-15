@@ -11,6 +11,7 @@ import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.NamespacedFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.Status;
+import it.pagopa.pdv.tokenizer.connector.exception.TooManyRequestsException;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Marker;
@@ -68,7 +69,11 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
             rootToken = globalFiscalCodeToken.getToken();
         } catch (ConditionalCheckFailedException e) {
             GlobalFiscalCodeToken globalTokenFound = globalFiscalCodeTableMapper.load(globalFiscalCodeToken.getPii(), globalFiscalCodeToken.getNamespace());
-            rootToken = globalTokenFound.getToken();
+            try {
+                rootToken = globalTokenFound.getToken();
+            } catch(NullPointerException ex) {
+                throw new TooManyRequestsException(ex);
+            }
             if (Status.PENDING_DELETE.equals(globalTokenFound.getStatus())) {
                 reactivateToken(globalFiscalCodeTableMapper.hashKey().name(),
                         globalFiscalCodeToken.getPii(),
@@ -93,7 +98,11 @@ public class TokenizerConnectorImpl implements TokenizerConnector {
         } catch (ConditionalCheckFailedException e) {
             NamespacedFiscalCodeToken namespacedTokenFound =
                     namespacedFiscalCodeTableMapper.load(namespacedFiscalCodeToken.getPii(), namespacedFiscalCodeToken.getNamespace());
-            token = namespacedTokenFound.getToken();
+            try {
+                token = namespacedTokenFound.getToken();
+            } catch(NullPointerException ex) {
+                throw new TooManyRequestsException(ex);
+            }
             if (Status.PENDING_DELETE.equals(namespacedTokenFound.getStatus())) {
                 reactivateToken(namespacedFiscalCodeTableMapper.hashKey().name(),
                         namespacedFiscalCodeToken.getPii(),
