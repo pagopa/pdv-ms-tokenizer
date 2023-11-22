@@ -178,8 +178,10 @@ class TokenizerConnectorImplTest {
         String namespace = "selfcare";
         String notAllowedNamespace = "idpay";
         TokenDto tokenDto = tokenizerConnector.save(pii, namespace);
+
         // when
         Optional<String> found = tokenizerConnector.findPiiByToken(tokenDto.getToken(), notAllowedNamespace);
+
         // then
         assertFalse(found.isPresent());
     }
