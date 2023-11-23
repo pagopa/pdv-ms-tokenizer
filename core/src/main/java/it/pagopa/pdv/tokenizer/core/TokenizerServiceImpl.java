@@ -1,6 +1,5 @@
 package it.pagopa.pdv.tokenizer.core;
 
-import com.amazonaws.xray.spring.aop.XRayEnabled;
 import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.model.TokenDto;
 import it.pagopa.pdv.tokenizer.core.exception.ResourceNotFoundException;
@@ -11,7 +10,6 @@ import org.springframework.util.Assert;
 
 @Slf4j
 @Service
-@XRayEnabled
 class TokenizerServiceImpl implements TokenizerService {
 
     private final TokenizerConnector tokenizerConnector;
