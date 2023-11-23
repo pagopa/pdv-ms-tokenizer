@@ -1,6 +1,5 @@
 package it.pagopa.pdv.tokenizer.web.controller;
 
-import com.amazonaws.xray.spring.aop.XRayEnabled;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,7 +27,6 @@ import static it.pagopa.pdv.tokenizer.core.logging.LogUtils.CONFIDENTIAL_MARKER;
 @RestController
 @RequestMapping(value = "tokens", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "token")
-@XRayEnabled
 public class TokenizerController {
 
     private static final String NAMESPACE_HEADER_NAME = "x-pagopa-namespace";
