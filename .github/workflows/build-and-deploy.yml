@@ -101,7 +101,7 @@ jobs:
         id: pull-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: x-ray-daemon-ecr # todo add environment short to name
+          ECR_REPOSITORY: tokenizer-${{ matrix.env_short }}-x-ray-daemon-ecr
           IMAGE_TAG: latest # todo remove latest
           #todo set dynamic retry of image name
         run: |
