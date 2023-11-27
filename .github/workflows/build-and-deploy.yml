@@ -97,6 +97,19 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+      - name: Pull, tag, and push X-Ray daemon image to Amazon ECR
+        id: pull-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: x-ray-daemon-ecr # todo add environment short to name
+          IMAGE_TAG: latest # todo remove latest
+          #todo set dynamic retry of image name
+        run: |
+          docker pull public.ecr.aws/xray/aws-xray-daemon:3.x
+          docker tag public.ecr.aws/xray/aws-xray-daemon:3.x $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
       - name: Download task definition
         run: |
           aws ecs describe-task-definition \
@@ -120,10 +133,18 @@ jobs:
           container-name: tokenizer-${{ matrix.env_short }}-container
           image: ${{ steps.build-image.outputs.image }}
 
+      - name: Fill in the new image ID for x-ray daemon in the Amazon ECS task definition
+        id: task-def-xray
+        uses: aws-actions/amazon-ecs-render-task-definition@61b0c00c3743b70987a73a1faf577f0d167d1574
+        with:
+          task-definition: ${{ steps.task-def-app.outputs.task-definition }}
+          container-name: tokenizer-${{ matrix.env_short }}-xray-daemon-container
+          image: ${{ steps.pull-image.outputs.image }}
+
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
         with:
-          task-definition: ${{ steps.task-def-app.outputs.task-definition }}
+          task-definition: ${{ steps.task-def-xray.outputs.task-definition }}
           service: tokenizer-${{ matrix.env_short }}-service-tokenizer
           cluster: tokenizer-${{ matrix.env_short }}-ecs-cluster
           wait-for-service-stability: true
