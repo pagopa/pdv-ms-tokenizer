@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder;
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import it.pagopa.pdv.tokenizer.connector.TokenizerConnector;
 import it.pagopa.pdv.tokenizer.connector.dao.model.GlobalFiscalCodeToken;
 import it.pagopa.pdv.tokenizer.connector.dao.model.NamespacedFiscalCodeToken;
@@ -27,6 +28,7 @@ import static com.amazonaws.services.dynamodbv2.xspec.ExpressionSpecBuilder.attr
 
 @Slf4j
 @Service
+@XRayEnabled
 public class TokenizerConnectorImpl implements TokenizerConnector {
 
     public static final String TABLE_NAME = "Token";

@@ -93,6 +93,13 @@
                 </exclusions>
                 <version>1.12.172</version>
             </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-xray-recorder-sdk-bom</artifactId>
+                <version>2.14.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- https://mvnrepository.com/artifact/com.amazonaws/DynamoDBLocal -->
             <dependency>
                 <groupId>com.amazonaws</groupId>
