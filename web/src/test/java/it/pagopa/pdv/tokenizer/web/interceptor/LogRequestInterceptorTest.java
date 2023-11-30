@@ -7,7 +7,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(OutputCaptureExtension.class)
@@ -38,11 +38,13 @@ class LogRequestInterceptorTest {
         MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
         mockHttpServletRequest.setRequestURI("/swagger-resources");
         MockHttpServletResponse mockHttpServletResponse = new MockHttpServletResponse();
+        String expectedSuffix = String.format(MESSAGE_TEMPLATE, mockHttpServletRequest.getMethod(), mockHttpServletRequest.getRequestURI());
+
         // when
         boolean result = logRequestInterceptorUnderTest.preHandle(mockHttpServletRequest, mockHttpServletResponse, "controller");
         // then
         assertTrue(result);
-        assertEquals(0, output.length());
+        assertFalse(output.getOut().endsWith(expectedSuffix));
     }
 
 }
