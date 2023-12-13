@@ -1,7 +1,6 @@
 package it.pagopa.pdv.tokenizer.web.config;
 
 import com.amazonaws.xray.jakarta.servlet.AWSXRayServletFilter;
-import com.amazonaws.xray.strategy.jakarta.SegmentNamingStrategy;
 import jakarta.servlet.Filter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -46,6 +45,6 @@ class WebConfig implements WebMvcConfigurer {
 
     @Bean
     public Filter TracingFilter() {
-        return new AWSXRayServletFilter(SegmentNamingStrategy.dynamic(this.applicationContext.getId()));
+        return new AWSXRayServletFilter("tokenizer-d-service-tokenizer");
     }
 }
