@@ -28,15 +28,6 @@ springdoc:
     resolve-schema-properties: true
   writer-with-order-by-keys: true
 
-management:
-  tracing:
-    baggage:
-      correlation:
-        fields:
-          - x-amzn-trace-id
-      remote-fields:
-        - x-amzn-trace-id
-
 logging:
   level:
     it.pagopa.pdv.tokenizer: ${APP_LOG_LEVEL:DEBUG}

@@ -39,6 +39,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-xray-recorder-sdk-slf4j</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
