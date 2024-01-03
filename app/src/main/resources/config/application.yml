@@ -31,3 +31,4 @@ springdoc:
 logging:
   level:
     it.pagopa.pdv.tokenizer: ${APP_LOG_LEVEL:DEBUG}
+    com.amazonaws.xray: ERROR
