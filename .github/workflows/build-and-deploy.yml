@@ -3,12 +3,21 @@ name: Java CI
 on:
   push:
     branches:
-      - "**"
+      - "main"
     paths:
       - "**/src/main/**"
       - "**pom.xml"
       - "Dockerfile"
       - ".github/workflows/build-and-deploy.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose environment'
+        type: choice
+        required: true
+        default: dev
+        options:
+        - dev
 
 jobs:
   build:
@@ -45,10 +54,8 @@ jobs:
         run: |
           if [ ${{ github.ref == 'refs/heads/main' }} == true ]; then 
             matrixStringifiedObject="{\"include\":[{\"environment\":\"uat\", \"env_short\": \"u\"},{\"environment\":\"prod\", \"env_short\": \"p\"}]}"
-          elif [ ${{ github.ref == 'refs/heads/develop' }} == true ]; then
-            matrixStringifiedObject="{\"include\":[{\"environment\":\"dev\", \"env_short\": \"d\"}]}"        
           else
-            matrixStringifiedObject=""
+            matrixStringifiedObject="{\"include\":[{\"environment\":\"dev\", \"env_short\": \"d\"}]}"
           fi
           
           echo "matrix=$matrixStringifiedObject" >> $GITHUB_OUTPUT
